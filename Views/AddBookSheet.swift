@@ -10,13 +10,8 @@ struct AddBookSheet: View {
     @State private var query = ""
     @State private var destination: BookStatus = .shopping
     @State private var showManual = false
-
-    private let suggestions: [(String, String)] = [
-        ("Klara and the Sun", "Kazuo Ishiguro"),
-        ("The Bee Sting",     "Paul Murray"),
-        ("Trust",             "Hernan Diaz"),
-        ("Stoner",            "John Williams"),
-    ]
+    @State private var suggestions: [BookSuggestion] = []
+    @State private var suggestionsLoading = true
 
     var body: some View {
         NavigationStack {
@@ -32,32 +27,44 @@ struct AddBookSheet: View {
 
                     VStack(alignment: .leading, spacing: 10) {
                         MetaLabel(text: "Popular right now")
-                        VStack(spacing: 0) {
-                            ForEach(Array(suggestions.enumerated()), id: \.offset) { idx, item in
-                                Button {
-                                    let id = store.addBook(title: item.0, author: item.1, status: destination)
-                                    onAdded(id)
-                                } label: {
-                                    HStack {
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            Text(item.0).font(.folioDisplay(15)).foregroundStyle(Folio.ink1)
-                                            Text(item.1).font(.folioUI(12)).foregroundStyle(Folio.ink3)
+                        if suggestionsLoading {
+                            HStack {
+                                Spacer()
+                                ProgressView()
+                                    .tint(Folio.ink3)
+                                Spacer()
+                            }
+                            .padding(.vertical, 20)
+                        } else {
+                            VStack(spacing: 0) {
+                                ForEach(Array(suggestions.enumerated()), id: \.offset) { idx, suggestion in
+                                    Button {
+                                        let id = store.addBook(title: suggestion.title,
+                                                               author: suggestion.author,
+                                                               status: destination)
+                                        onAdded(id)
+                                    } label: {
+                                        HStack {
+                                            VStack(alignment: .leading, spacing: 2) {
+                                                Text(suggestion.title).font(.folioDisplay(15)).foregroundStyle(Folio.ink1)
+                                                Text(suggestion.author).font(.folioUI(12)).foregroundStyle(Folio.ink3)
+                                            }
+                                            Spacer()
+                                            Image(systemName: "plus")
+                                                .font(.system(size: 14, weight: .semibold))
+                                                .foregroundStyle(Folio.paper0)
+                                                .frame(width: 28, height: 28)
+                                                .background(Circle().fill(Folio.sienna))
                                         }
-                                        Spacer()
-                                        Image(systemName: "plus")
-                                            .font(.system(size: 14, weight: .semibold))
-                                            .foregroundStyle(Folio.paper0)
-                                            .frame(width: 28, height: 28)
-                                            .background(Circle().fill(Folio.sienna))
+                                        .padding(.vertical, 12)
                                     }
-                                    .padding(.vertical, 12)
-                                }
-                                .buttonStyle(.plain)
-                                .overlay(alignment: .top) {
-                                    if idx == 0 { Rectangle().fill(Folio.paperEdge).frame(height: 0.5) }
-                                }
-                                .overlay(alignment: .bottom) {
-                                    Rectangle().fill(Folio.paperEdge).frame(height: 0.5)
+                                    .buttonStyle(.plain)
+                                    .overlay(alignment: .top) {
+                                        if idx == 0 { Rectangle().fill(Folio.paperEdge).frame(height: 0.5) }
+                                    }
+                                    .overlay(alignment: .bottom) {
+                                        Rectangle().fill(Folio.paperEdge).frame(height: 0.5)
+                                    }
                                 }
                             }
                         }
@@ -79,6 +86,7 @@ struct AddBookSheet: View {
             .sheet(isPresented: $showManual) {
                 ManualEntryView(initialStatus: destination, onSaved: onAdded)
             }
+            .task { await loadSuggestions() }
         }
         .presentationDragIndicator(.visible)
     }
@@ -204,4 +212,59 @@ struct AddBookSheet: View {
         query = ""
         onAdded(id)
     }
+
+    // MARK: - Open Library suggestions
+
+    private func loadSuggestions() async {
+        async let trending = fetchTrending(take: 3)
+        async let classics = fetchClassics(take: 2)
+        let (t, c) = await (trending, classics)
+        suggestions = t + c
+        suggestionsLoading = false
+    }
+
+    private func fetchTrending(take: Int) async -> [BookSuggestion] {
+        guard let url = URL(string: "https://openlibrary.org/trending/daily.json?limit=\(take + 3)") else { return [] }
+        guard let (data, _) = try? await URLSession.shared.data(from: url) else { return [] }
+        guard let response = try? JSONDecoder().decode(OLTrendingResponse.self, from: data) else { return [] }
+        return response.works.prefix(take).compactMap { work in
+            guard let author = work.author_name?.first else { return nil }
+            return BookSuggestion(title: work.title, author: author)
+        }
+    }
+
+    private func fetchClassics(take: Int) async -> [BookSuggestion] {
+        guard let url = URL(string: "https://openlibrary.org/subjects/classics.json?limit=30") else { return [] }
+        guard let (data, _) = try? await URLSession.shared.data(from: url) else { return [] }
+        guard let response = try? JSONDecoder().decode(OLSubjectsResponse.self, from: data) else { return [] }
+        return response.works.shuffled().prefix(take).compactMap { work in
+            guard let author = work.authors?.first?.name else { return nil }
+            return BookSuggestion(title: work.title, author: author)
+        }
+    }
+}
+
+// MARK: - Models
+
+private struct BookSuggestion: Identifiable {
+    let id = UUID()
+    let title: String
+    let author: String
+}
+
+private struct OLTrendingResponse: Decodable {
+    struct Work: Decodable {
+        let title: String
+        let author_name: [String]?
+    }
+    let works: [Work]
+}
+
+private struct OLSubjectsResponse: Decodable {
+    struct Work: Decodable {
+        struct Author: Decodable { let name: String }
+        let title: String
+        let authors: [Author]?
+    }
+    let works: [Work]
 }
