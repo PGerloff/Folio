@@ -1,0 +1,27 @@
+# Xcode
+*.xcodeproj/
+*.xcworkspace/
+build/
+DerivedData/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+
+# SwiftUI & Swift
+.DS_Store
+.swiftpm/
+Package.resolved
+*.swift.backup
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Local environment
+.env
+.env.local

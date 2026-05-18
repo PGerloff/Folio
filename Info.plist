@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDisplayName</key>
+    <string>Folio</string>
+    <key>CFBundleName</key>
+    <string>Folio</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.1.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+
+    <!-- Photo capture: camera permission required for "Take Photo" path. -->
+    <key>NSCameraUsageDescription</key>
+    <string>Take a photo of your book to use as the cover in your library.</string>
+
+    <!-- PhotosPicker doesn't require this, but include it for the older
+         UIImagePickerController (.photoLibrary) path if you add it later. -->
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Pick a book cover from your photo library.</string>
+
+    <key>UILaunchScreen</key>
+    <dict>
+        <key>UIColorName</key>
+        <string></string>
+    </dict>
+
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+    </array>
+</dict>
+</plist>
