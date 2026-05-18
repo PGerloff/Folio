@@ -17,12 +17,12 @@ targets:
     type: application
     platform: iOS
     sources:
-      - path: .
-        excludes:
-          - "project.yml"
-          - "README.md"
-          - ".gitignore"
-          - "Folio.xcodeproj/**"
+      - path: FolioApp.swift
+      - path: Models
+      - path: Store
+      - path: Theme
+      - path: Components
+      - path: Views
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.folio.app
