@@ -215,17 +215,35 @@ struct AddBookSheet: View {
 
     // MARK: - Open Library suggestions
 
+    // Session-level cache — avoids re-fetching on every sheet open.
+    private static var cachedSuggestions: [BookSuggestion] = []
+    private static var cacheDate: Date?
+    private static let cacheTTL: TimeInterval = 3600 // 1 hour
+
     private func loadSuggestions() async {
+        if let date = Self.cacheDate,
+           Date().timeIntervalSince(date) < Self.cacheTTL,
+           !Self.cachedSuggestions.isEmpty {
+            suggestions = Self.cachedSuggestions
+            suggestionsLoading = false
+            return
+        }
+
         async let trending = fetchTrending(take: 3)
         async let classics = fetchClassics(take: 2)
         let (t, c) = await (trending, classics)
-        suggestions = t + c
+        let result = t + c
+        if !result.isEmpty {
+            Self.cachedSuggestions = result
+            Self.cacheDate = Date()
+        }
+        suggestions = result
         suggestionsLoading = false
     }
 
     private func fetchTrending(take: Int) async -> [BookSuggestion] {
         guard let url = URL(string: "https://openlibrary.org/trending/daily.json?limit=\(take + 3)") else { return [] }
-        guard let (data, _) = try? await URLSession.shared.data(from: url) else { return [] }
+        guard let (data, _) = try? await URLSession.shared.data(for: .olRequest(url)) else { return [] }
         guard let response = try? JSONDecoder().decode(OLTrendingResponse.self, from: data) else { return [] }
         return response.works.prefix(take).compactMap { work in
             guard let author = work.author_name?.first else { return nil }
@@ -235,7 +253,7 @@ struct AddBookSheet: View {
 
     private func fetchClassics(take: Int) async -> [BookSuggestion] {
         guard let url = URL(string: "https://openlibrary.org/subjects/classics.json?limit=30") else { return [] }
-        guard let (data, _) = try? await URLSession.shared.data(from: url) else { return [] }
+        guard let (data, _) = try? await URLSession.shared.data(for: .olRequest(url)) else { return [] }
         guard let response = try? JSONDecoder().decode(OLSubjectsResponse.self, from: data) else { return [] }
         return response.works.shuffled().prefix(take).compactMap { work in
             guard let author = work.authors?.first?.name else { return nil }
@@ -258,6 +276,15 @@ private struct OLTrendingResponse: Decodable {
         let author_name: [String]?
     }
     let works: [Work]
+}
+
+private extension URLRequest {
+    // Open Library requires a User-Agent identifying the app and a contact address.
+    static func olRequest(_ url: URL) -> URLRequest {
+        var req = URLRequest(url: url)
+        req.setValue("Folio/1.0 (nodabs@gmail.com)", forHTTPHeaderField: "User-Agent")
+        return req
+    }
 }
 
 private struct OLSubjectsResponse: Decodable {
