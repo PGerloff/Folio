@@ -9,7 +9,7 @@ struct BookDetailView: View {
     let bookId: UUID
 
     @State private var noteDraft = ""
-    @State private var confirmDelete = false
+    @State private var showDeleteAlert = false
 
     private var book: Book? { store.book(bookId) }
 
@@ -58,6 +58,15 @@ struct BookDetailView: View {
             .scrollIndicators(.hidden)
         }
         .background(Folio.paper0.ignoresSafeArea())
+        .alert("Remove this book?", isPresented: $showDeleteAlert) {
+            Button("Remove", role: .destructive) {
+                store.remove(bookId)
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will permanently delete the book from your library.")
+        }
     }
 
     private func navRow(book: Book) -> some View {
@@ -68,16 +77,8 @@ struct BookDetailView: View {
                              tint: book.isFavorite ? Folio.rust : Folio.ink1) {
                 store.toggleFavorite(book.id)
             }
-            CircleIconButton(systemName: "trash",
-                             tint: confirmDelete ? Color(hex: 0xF5ECD8) : Folio.ink1,
-                             background: confirmDelete ? Folio.rust : nil) {
-                if confirmDelete {
-                    store.remove(book.id)
-                    dismiss()
-                } else {
-                    confirmDelete = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { confirmDelete = false }
-                }
+            CircleIconButton(systemName: "trash") {
+                showDeleteAlert = true
             }
         }
         .padding(.horizontal, 16)

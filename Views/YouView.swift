@@ -39,11 +39,11 @@ struct YouView: View {
             }
             .background(Folio.paper0.ignoresSafeArea())
             .scrollIndicators(.hidden)
-            .alert("Reset to sample library?", isPresented: $confirmReset) {
-                Button("Reset", role: .destructive) { store.resetToSeed() }
+            .alert("Clear library?", isPresented: $confirmReset) {
+                Button("Clear all", role: .destructive) { store.resetLibrary() }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("Your changes will be lost.")
+                Text("All books and favourites will be removed. This cannot be undone.")
             }
         }
     }
@@ -134,7 +134,7 @@ struct YouView: View {
             settingsRow("Notifications")
             settingsRow("Display & theme")
             settingsRow("Export library")
-            settingsRow("Reset to sample data", isLast: true) { confirmReset = true }
+            settingsRow("Clear library", isLast: true) { confirmReset = true }
         }
     }
 

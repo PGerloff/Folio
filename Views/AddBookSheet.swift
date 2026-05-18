@@ -170,35 +170,27 @@ struct AddBookSheet: View {
     }
 
     private var methodGrid: some View {
-        HStack(spacing: 10) {
-            Button { showManual = true } label: {
-                methodCard(icon: "pencil", title: "Full details", sub: "Title · author · year", enabled: true)
+        Button { showManual = true } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "pencil")
+                    .font(.system(size: 20))
+                    .foregroundStyle(Folio.sienna)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Full details").font(.folioDisplay(14)).foregroundStyle(Folio.ink1)
+                    MetaLabel(text: "Title · author · year")
+                }
+                Spacer()
             }
-            .buttonStyle(.plain)
-
-            methodCard(icon: "barcode.viewfinder", title: "Scan barcode", sub: "Coming soon", enabled: false)
-                .opacity(0.55)
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Folio.paper1)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .strokeBorder(Folio.paperEdge, lineWidth: 0.5)
+            )
         }
-    }
-
-    private func methodCard(icon: String, title: String, sub: String, enabled: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: icon)
-                .font(.system(size: 20))
-                .foregroundStyle(Folio.sienna)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.folioDisplay(14)).foregroundStyle(Folio.ink1)
-                MetaLabel(text: sub)
-            }
-        }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Folio.paper1)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(Folio.paperEdge, lineWidth: 0.5)
-        )
+        .buttonStyle(.plain)
     }
 
     private func submit() {

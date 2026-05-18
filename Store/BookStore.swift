@@ -21,7 +21,6 @@ final class BookStore {
         self.coversDir = docs.appendingPathComponent("covers", isDirectory: true)
         try? FileManager.default.createDirectory(at: coversDir, withIntermediateDirectories: true)
         load()
-        if books.isEmpty { seed() }
     }
 
     // MARK: - Query
@@ -176,8 +175,7 @@ final class BookStore {
         }
     }
 
-    func resetToSeed() {
-        // Clear photo files for current books
+    func resetLibrary() {
         for book in books {
             if let name = book.photoFilename {
                 try? FileManager.default.removeItem(at: coversDir.appendingPathComponent(name))
@@ -185,27 +183,6 @@ final class BookStore {
         }
         books.removeAll()
         favoriteAuthors.removeAll()
-        seed()
-    }
-
-    // MARK: - Seed
-
-    private func seed() {
-        favoriteAuthors = ["Virginia Woolf", "Toni Morrison"]
-        books = [
-            .init(title: "Piranesi",                author: "Susanna Clarke",        year: 2020, status: .reading,  isFavorite: true,  coverColor: .cocoa, accentColor: .sand),
-            .init(title: "Orlando",                 author: "Virginia Woolf",        year: 1928, status: .reading,  isFavorite: false, coverColor: .olive, accentColor: .bone),
-            .init(title: "The Sea, the Sea",        author: "Iris Murdoch",          year: 1978, status: .shopping, coverColor: .rust,  accentColor: .bone),
-            .init(title: "Pachinko",                author: "Min Jin Lee",           year: 2017, status: .shopping, coverColor: .clay,  accentColor: .bone),
-            .init(title: "Station Eleven",          author: "Emily St. John Mandel", year: 2014, status: .shopping, coverColor: .sage,  accentColor: .cocoa),
-            .init(title: "Gilead",                  author: "Marilynne Robinson",    year: 2004, status: .toread,   coverColor: .sand,  accentColor: .cocoa),
-            .init(title: "Severance",               author: "Ling Ma",               year: 2018, status: .toread,   coverColor: .plum,  accentColor: .bone),
-            .init(title: "Wolf Hall",               author: "Hilary Mantel",         year: 2009, status: .finished, isFavorite: true,  rating: 5, finishedDate: "Mar 2026", coverColor: .plum,  accentColor: .sand),
-            .init(title: "Beloved",                 author: "Toni Morrison",         year: 1987, status: .finished, isFavorite: true,  rating: 5, finishedDate: "Feb 2026", coverColor: .rust,  accentColor: .bone),
-            .init(title: "The Overstory",           author: "Richard Powers",        year: 2018, status: .finished, rating: 4, finishedDate: "Jan 2026", coverColor: .olive, accentColor: .bone),
-            .init(title: "The Remains of the Day",  author: "Kazuo Ishiguro",        year: 1989, status: .finished, rating: 5, finishedDate: "Dec 2025", coverColor: .tea,   accentColor: .cocoa),
-            .init(title: "To the Lighthouse",       author: "Virginia Woolf",        year: 1927, status: .finished, isFavorite: true,  rating: 5, finishedDate: "Oct 2025", coverColor: .sage,  accentColor: .cocoa),
-        ]
         save()
     }
 
