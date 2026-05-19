@@ -242,13 +242,35 @@ struct AddBookSheet: View {
     }
 
     private func fetchTrending(take: Int) async -> [BookSuggestion] {
-        guard let url = URL(string: "https://openlibrary.org/trending/daily.json?limit=\(take + 3)") else { return [] }
-        guard let (data, _) = try? await URLSession.shared.data(for: .olRequest(url)) else { return [] }
-        guard let response = try? JSONDecoder().decode(OLTrendingResponse.self, from: data) else { return [] }
-        return response.works.prefix(take).compactMap { work in
-            guard let author = work.author_name?.first else { return nil }
-            return BookSuggestion(title: work.title, author: author)
+        // Open Library's /trending/*.json endpoints return HTML, not JSON —
+        // trending is a web-only feature. Use the search API with
+        // sort=currently_reading, which surfaces the books people are
+        // actively reading right now (the closest live "trending" signal).
+        // If that returns nothing, fall back to readinglog (all-time
+        // reading-list popularity).
+        if let result = await popularBooks(sort: "currently_reading", take: take), !result.isEmpty {
+            return result
         }
+        return await popularBooks(sort: "readinglog", take: take) ?? []
+    }
+
+    private func popularBooks(sort: String, take: Int) async -> [BookSuggestion]? {
+        var components = URLComponents(string: "https://openlibrary.org/search.json")!
+        components.queryItems = [
+            .init(name: "q",      value: "*:*"),
+            .init(name: "sort",   value: sort),
+            .init(name: "limit",  value: "\(take + 5)"),
+            .init(name: "fields", value: "title,author_name")
+        ]
+        guard let url = components.url else { return nil }
+        guard let (data, response) = try? await URLSession.shared.data(for: .olRequest(url)) else { return nil }
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { return nil }
+        guard let decoded = try? JSONDecoder().decode(OLPopularResponse.self, from: data) else { return nil }
+        let mapped: [BookSuggestion] = decoded.docs.compactMap { doc in
+            guard let author = doc.author_name?.first else { return nil }
+            return BookSuggestion(title: doc.title, author: author)
+        }
+        return Array(mapped.prefix(take))
     }
 
     private func fetchClassics(take: Int) async -> [BookSuggestion] {
@@ -270,12 +292,12 @@ private struct BookSuggestion: Identifiable {
     let author: String
 }
 
-private struct OLTrendingResponse: Decodable {
-    struct Work: Decodable {
+private struct OLPopularResponse: Decodable {
+    struct Doc: Decodable {
         let title: String
         let author_name: [String]?
     }
-    let works: [Work]
+    let docs: [Doc]
 }
 
 private extension URLRequest {
