@@ -50,13 +50,6 @@ struct HomeView: View {
     private var shoppingCTA: some View {
         Button { showAdd = true } label: {
             HStack(spacing: 14) {
-                ZStack {
-                    Circle().fill(.white.opacity(0.18))
-                    Image(systemName: "cart.fill")
-                        .foregroundStyle(Color(hex: 0xF5ECD8))
-                }
-                .frame(width: 40, height: 40)
-
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Add to shopping list")
                         .font(.folioDisplay(18))

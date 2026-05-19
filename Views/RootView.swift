@@ -16,7 +16,7 @@ struct RootView: View {
                 .tag(Tab.home)
 
             ShopView(showAdd: $showAdd, openBook: openBook)
-                .tabItem { Label("Shop", systemImage: "cart") }
+                .tabItem { Label("Add", systemImage: "plus") }
                 .tag(Tab.shop)
 
             LibraryView(openBook: openBook)

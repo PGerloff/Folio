@@ -38,7 +38,7 @@ struct ShopView: View {
         VStack(alignment: .leading, spacing: 6) {
             MetaLabel(text: "Shopping list")
             HStack(alignment: .firstTextBaseline) {
-                Text("Shop")
+                Text("Add")
                     .font(.folioDisplay(36))
                     .kerning(-0.7)
                     .foregroundStyle(Folio.ink1)
@@ -70,7 +70,7 @@ struct ShopView: View {
 
     private var emptyState: some View {
         VStack(spacing: 10) {
-            Image(systemName: "cart")
+            Image(systemName: "book.closed")
                 .font(.system(size: 28))
                 .foregroundStyle(Folio.ink4)
             Text("Nothing on the list yet")
