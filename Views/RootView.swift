@@ -5,11 +5,14 @@ import SwiftUI
 enum Tab: Hashable { case home, shop, library, you }
 
 struct RootView: View {
+    @Environment(BookStore.self) private var store
     @State private var tab: Tab = .home
     @State private var showAdd = false
     @State private var pendingDetail: UUID?
 
     var body: some View {
+        @Bindable var bindableStore = store
+
         TabView(selection: $tab) {
             HomeView(showAdd: $showAdd, openBook: openBook, switchTo: { tab = $0 })
                 .tabItem { Label("Home", systemImage: "book") }
@@ -39,6 +42,16 @@ struct RootView: View {
             set: { pendingDetail = $0?.id }
         )) { wrap in
             BookDetailView(bookId: wrap.id)
+        }
+        .alert("Library issue",
+               isPresented: Binding(
+                   get: { bindableStore.lastErrorMessage != nil },
+                   set: { if !$0 { bindableStore.lastErrorMessage = nil } }
+               ),
+               presenting: bindableStore.lastErrorMessage) { _ in
+            Button("OK", role: .cancel) { bindableStore.lastErrorMessage = nil }
+        } message: { message in
+            Text(message)
         }
     }
 

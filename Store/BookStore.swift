@@ -12,8 +12,21 @@ final class BookStore {
     var books: [Book] = []
     var favoriteAuthors: Set<String> = []
 
+    /// Surfaced to the UI so the user sees disk/decode failures instead of
+    /// silently losing data. Cleared after the alert is dismissed.
+    var lastErrorMessage: String?
+
     private let storeURL: URL
     private let coversDir: URL
+
+    /// In-memory cache of decoded cover images, keyed by filename.
+    /// Avoids re-reading + re-decoding JPEGs on every SwiftUI view recompute.
+    /// NSCache is thread-safe and auto-evicts under memory pressure.
+    @ObservationIgnored private let coverCache: NSCache<NSString, UIImage> = {
+        let c = NSCache<NSString, UIImage>()
+        c.countLimit = 200
+        return c
+    }()
 
     init() {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -67,6 +80,7 @@ final class BookStore {
     func remove(_ id: UUID) {
         if let book = book(id), let name = book.photoFilename {
             try? FileManager.default.removeItem(at: coversDir.appendingPathComponent(name))
+            invalidateCoverCache(name)
         }
         books.removeAll { $0.id == id }
         save()
@@ -94,6 +108,7 @@ final class BookStore {
             // Remove old file if replacing/clearing
             if let old = book.photoFilename {
                 try? FileManager.default.removeItem(at: coversDir.appendingPathComponent(old))
+                invalidateCoverCache(old)
                 book.photoFilename = nil
             }
             if let data {
@@ -126,10 +141,7 @@ final class BookStore {
         ]
         guard let searchURL = components.url else { return }
 
-        var searchRequest = URLRequest(url: searchURL)
-        searchRequest.setValue("Folio/1.0 (nodabs@gmail.com)", forHTTPHeaderField: "User-Agent")
-
-        guard let (searchData, _) = try? await URLSession.shared.data(for: searchRequest),
+        guard let (searchData, _) = try? await URLSession.shared.data(for: OpenLibrary.request(searchURL)),
               let result = try? JSONDecoder().decode(OLSearchResponse.self, from: searchData),
               let coverId = result.docs.first?.cover_i else { return }
 
@@ -137,10 +149,7 @@ final class BookStore {
         // Library return a 404 instead of a 1×1 placeholder when no cover exists.
         guard let coverURL = URL(string: "https://covers.openlibrary.org/b/id/\(coverId)-M.jpg?default=false") else { return }
 
-        var coverRequest = URLRequest(url: coverURL)
-        coverRequest.setValue("Folio/1.0 (nodabs@gmail.com)", forHTTPHeaderField: "User-Agent")
-
-        guard let (imageData, response) = try? await URLSession.shared.data(for: coverRequest),
+        guard let (imageData, response) = try? await URLSession.shared.data(for: OpenLibrary.request(coverURL)),
               let http = response as? HTTPURLResponse, http.statusCode == 200,
               !imageData.isEmpty else { return }
 
@@ -173,10 +182,21 @@ final class BookStore {
 
     // MARK: - Photo files
 
-    /// Returns a `UIImage` loaded from the covers directory, or nil.
+    /// Returns a `UIImage` for the cover file, decoded once and cached.
+    /// Called from `CoverView.body` on every render, so it MUST be cheap.
     func loadCoverImage(_ filename: String) -> UIImage? {
+        let key = filename as NSString
+        if let cached = coverCache.object(forKey: key) { return cached }
         let url = coversDir.appendingPathComponent(filename)
-        return UIImage(contentsOfFile: url.path)
+        guard let image = UIImage(contentsOfFile: url.path) else { return nil }
+        coverCache.setObject(image, forKey: key)
+        return image
+    }
+
+    /// Drop a cached image (call when its file is deleted or replaced).
+    private func invalidateCoverCache(_ filename: String?) {
+        guard let filename else { return }
+        coverCache.removeObject(forKey: filename as NSString)
     }
 
     private func writePhoto(data: Data, for bookId: UUID) -> String? {
@@ -210,19 +230,49 @@ final class BookStore {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         encoder.dateEncodingStrategy = .iso8601
-        if let data = try? encoder.encode(payload) {
-            try? data.write(to: storeURL, options: .atomic)
+        do {
+            let data = try encoder.encode(payload)
+            try data.write(to: storeURL, options: .atomic)
+        } catch {
+            // Surface disk-write failures to the UI. The user needs to know
+            // their change might not survive an app restart.
+            lastErrorMessage = "Couldn't save your library: \(error.localizedDescription)"
         }
     }
 
     private func load() {
-        guard let data = try? Data(contentsOf: storeURL) else { return }
+        // First-launch case — no file yet.
+        guard FileManager.default.fileExists(atPath: storeURL.path) else { return }
+
+        let data: Data
+        do {
+            data = try Data(contentsOf: storeURL)
+        } catch {
+            lastErrorMessage = "Couldn't read your library file: \(error.localizedDescription)"
+            return
+        }
+
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        if let payload = try? decoder.decode(Persisted.self, from: data) {
+        do {
+            let payload = try decoder.decode(Persisted.self, from: data)
             self.books = payload.books
             self.favoriteAuthors = Set(payload.favoriteAuthors)
+        } catch {
+            // Corrupted JSON. Back the file up BEFORE the next save() overwrites
+            // it — keeps the user's data recoverable.
+            backupCorruptedStore()
+            lastErrorMessage = "Your library file was unreadable and has been backed up. The library has been reset."
         }
+    }
+
+    private func backupCorruptedStore() {
+        let stamp = ISO8601DateFormatter().string(from: Date())
+            .replacingOccurrences(of: ":", with: "-")
+        let backupURL = storeURL
+            .deletingPathExtension()
+            .appendingPathExtension("corrupted-\(stamp).json")
+        try? FileManager.default.moveItem(at: storeURL, to: backupURL)
     }
 
     func resetLibrary() {
@@ -231,6 +281,7 @@ final class BookStore {
                 try? FileManager.default.removeItem(at: coversDir.appendingPathComponent(name))
             }
         }
+        coverCache.removeAllObjects()
         books.removeAll()
         favoriteAuthors.removeAll()
         save()

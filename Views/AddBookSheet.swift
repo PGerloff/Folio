@@ -263,7 +263,7 @@ struct AddBookSheet: View {
             .init(name: "fields", value: "title,author_name")
         ]
         guard let url = components.url else { return nil }
-        guard let (data, response) = try? await URLSession.shared.data(for: .olRequest(url)) else { return nil }
+        guard let (data, response) = try? await URLSession.shared.data(for: OpenLibrary.request(url)) else { return nil }
         guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { return nil }
         guard let decoded = try? JSONDecoder().decode(OLPopularResponse.self, from: data) else { return nil }
         let mapped: [BookSuggestion] = decoded.docs.compactMap { doc in
@@ -275,7 +275,7 @@ struct AddBookSheet: View {
 
     private func fetchClassics(take: Int) async -> [BookSuggestion] {
         guard let url = URL(string: "https://openlibrary.org/subjects/classics.json?limit=30") else { return [] }
-        guard let (data, _) = try? await URLSession.shared.data(for: .olRequest(url)) else { return [] }
+        guard let (data, _) = try? await URLSession.shared.data(for: OpenLibrary.request(url)) else { return [] }
         guard let response = try? JSONDecoder().decode(OLSubjectsResponse.self, from: data) else { return [] }
         return response.works.shuffled().prefix(take).compactMap { work in
             guard let author = work.authors?.first?.name else { return nil }
@@ -298,15 +298,6 @@ private struct OLPopularResponse: Decodable {
         let author_name: [String]?
     }
     let docs: [Doc]
-}
-
-private extension URLRequest {
-    // Open Library requires a User-Agent identifying the app and a contact address.
-    static func olRequest(_ url: URL) -> URLRequest {
-        var req = URLRequest(url: url)
-        req.setValue("Folio/1.0 (nodabs@gmail.com)", forHTTPHeaderField: "User-Agent")
-        return req
-    }
 }
 
 private struct OLSubjectsResponse: Decodable {
