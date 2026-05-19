@@ -27,6 +27,8 @@ enum BookShareContent {
             return "Currently reading \"\(book.title)\" \(byline) — looks great so far."
         case .toread, .shopping:
             return "I want to read \"\(book.title)\" \(byline) — heard it's great."
+        case .dnf:
+            return "I started \"\(book.title)\" \(byline) — let me know what you think."
         }
     }
 
