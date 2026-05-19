@@ -10,6 +10,7 @@ struct BookDetailView: View {
 
     @State private var noteDraft = ""
     @State private var showDeleteAlert = false
+    @State private var showShare = false
 
     private var book: Book? { store.book(bookId) }
 
@@ -58,6 +59,9 @@ struct BookDetailView: View {
             .scrollIndicators(.hidden)
         }
         .background(Folio.paper0.ignoresSafeArea())
+        .sheet(isPresented: $showShare) {
+            ShareSheetLoader(book: book, store: store)
+        }
         .alert("Remove this book?", isPresented: $showDeleteAlert) {
             Button("Remove", role: .destructive) {
                 store.remove(bookId)
@@ -76,6 +80,9 @@ struct BookDetailView: View {
             CircleIconButton(systemName: book.isFavorite ? "heart.fill" : "heart",
                              tint: book.isFavorite ? Folio.rust : Folio.ink1) {
                 store.toggleFavorite(book.id)
+            }
+            CircleIconButton(systemName: "square.and.arrow.up") {
+                showShare = true
             }
             CircleIconButton(systemName: "trash") {
                 showDeleteAlert = true
@@ -254,6 +261,34 @@ struct BookDetailView: View {
             }
         }
         .padding(.horizontal, 24)
+    }
+}
+
+// MARK: - Share loader
+
+/// Resolves the share payload asynchronously then presents the system share sheet.
+/// The `Color.clear` placeholder is invisible — UIActivityViewController draws
+/// its own chrome on top as soon as `items` is populated (usually < 1 frame).
+private struct ShareSheetLoader: View {
+    let book: Book
+    let store: BookStore
+    @State private var items: [Any]?
+
+    var body: some View {
+        Group {
+            if let items {
+                ShareSheet(activityItems: items)
+            } else {
+                Color.clear.frame(width: 1, height: 1)
+            }
+        }
+        .task {
+            let text = BookShareContent.text(for: book)
+            let image = await BookShareContent.coverImage(for: book, store: store)
+            var result: [Any] = [text]
+            if let image { result.append(image) }
+            items = result
+        }
     }
 }
 
