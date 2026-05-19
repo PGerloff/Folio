@@ -42,6 +42,14 @@ struct AddBookSheet: View {
                                         let id = store.addBook(title: suggestion.title,
                                                                author: suggestion.author,
                                                                status: destination)
+                                        let theStore = store
+                                        let title = suggestion.title
+                                        let author = suggestion.author
+                                        Task {
+                                            await theStore.fetchCoverFromOpenLibrary(for: id,
+                                                                                     title: title,
+                                                                                     author: author)
+                                        }
                                         onAdded(id)
                                     } label: {
                                         HStack {
