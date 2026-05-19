@@ -53,7 +53,7 @@ struct ShopView: View {
             Button { showAdd = true } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "plus")
-                    Text("Add a book to buy")
+                    Text("Add a book")
                 }
                 .font(.folioUI(14, weight: .medium))
                 .foregroundStyle(Color(hex: 0xF5ECD8))
