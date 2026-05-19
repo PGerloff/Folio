@@ -102,6 +102,56 @@ final class BookStore {
         }
     }
 
+    /// Try to find a cover on Open Library by title + author and download it.
+    /// Silently no-ops if the book already has a photo, the search returns no
+    /// match, or the network fails.
+    ///
+    /// Uses the medium ("M", ~180px wide) cover size to keep payloads small
+    /// — typical M cover is 5–15 KB; large ("L") is 30–80 KB.
+    func fetchCoverFromOpenLibrary(for bookId: UUID, title: String, author: String) async {
+        // Guards
+        guard let current = book(bookId), current.photoFilename == nil else { return }
+        let title = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        let author = author.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !title.isEmpty, !author.isEmpty,
+              author.caseInsensitiveCompare("Unknown") != .orderedSame else { return }
+
+        // Step 1 — search for the work, ask only for the cover_i field.
+        var components = URLComponents(string: "https://openlibrary.org/search.json")!
+        components.queryItems = [
+            .init(name: "title",  value: title),
+            .init(name: "author", value: author),
+            .init(name: "limit",  value: "1"),
+            .init(name: "fields", value: "cover_i")
+        ]
+        guard let searchURL = components.url else { return }
+
+        var searchRequest = URLRequest(url: searchURL)
+        searchRequest.setValue("Folio/1.0 (nodabs@gmail.com)", forHTTPHeaderField: "User-Agent")
+
+        guard let (searchData, _) = try? await URLSession.shared.data(for: searchRequest),
+              let result = try? JSONDecoder().decode(OLSearchResponse.self, from: searchData),
+              let coverId = result.docs.first?.cover_i else { return }
+
+        // Step 2 — fetch the medium-size JPEG. `?default=false` makes Open
+        // Library return a 404 instead of a 1×1 placeholder when no cover exists.
+        guard let coverURL = URL(string: "https://covers.openlibrary.org/b/id/\(coverId)-M.jpg?default=false") else { return }
+
+        var coverRequest = URLRequest(url: coverURL)
+        coverRequest.setValue("Folio/1.0 (nodabs@gmail.com)", forHTTPHeaderField: "User-Agent")
+
+        guard let (imageData, response) = try? await URLSession.shared.data(for: coverRequest),
+              let http = response as? HTTPURLResponse, http.statusCode == 200,
+              !imageData.isEmpty else { return }
+
+        // Step 3 — persist, but only if the user hasn't added a photo in the
+        // meantime. Bounce to main to mutate the @Observable store consistently.
+        await MainActor.run {
+            guard let now = book(bookId), now.photoFilename == nil else { return }
+            setPhoto(bookId, data: imageData)
+        }
+    }
+
     func toggleFavoriteAuthor(_ name: String) {
         if favoriteAuthors.contains(name) {
             favoriteAuthors.remove(name)
@@ -191,4 +241,11 @@ final class BookStore {
         f.dateFormat = "MMM yyyy"
         return f
     }()
+}
+
+// MARK: - Open Library response
+
+private struct OLSearchResponse: Decodable {
+    struct Doc: Decodable { let cover_i: Int? }
+    let docs: [Doc]
 }

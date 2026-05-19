@@ -119,13 +119,25 @@ struct ManualEntryView: View {
 
     private func save() {
         let yearInt = Int(year.trimmingCharacters(in: .whitespaces))
+        let trimmedTitle  = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedAuthor = author.trimmingCharacters(in: .whitespacesAndNewlines)
         let id = store.addBook(
-            title: title.trimmingCharacters(in: .whitespacesAndNewlines),
-            author: author.trimmingCharacters(in: .whitespacesAndNewlines),
+            title: trimmedTitle,
+            author: trimmedAuthor,
             year: yearInt,
             status: status,
             photoData: photoData
         )
+        // If the user didn't supply a photo and we have both title + author,
+        // try to source a cover from Open Library in the background.
+        if photoData == nil, !trimmedTitle.isEmpty, !trimmedAuthor.isEmpty {
+            let theStore = store
+            Task {
+                await theStore.fetchCoverFromOpenLibrary(for: id,
+                                                        title: trimmedTitle,
+                                                        author: trimmedAuthor)
+            }
+        }
         onSaved(id)
         dismiss()
     }
