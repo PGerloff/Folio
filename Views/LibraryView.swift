@@ -23,7 +23,7 @@ struct LibraryView: View {
 
     private var visible: [Book] {
         switch filter {
-        case .all:       return store.owned
+        case .all:       return store.owned.sorted { $0.isFavorite && !$1.isFavorite }
         case .toread:    return store.books(status: .toread)
         case .reading:   return store.books(status: .reading)
         case .finished:  return store.books(status: .finished)
@@ -61,7 +61,7 @@ struct LibraryView: View {
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 6) {
-                        ForEach([Filter.all, .toread, .reading, .finished, .favorites], id: \.self) { f in
+                        ForEach([Filter.all, .toread, .reading, .favorites, .finished], id: \.self) { f in
                             FilterChip(label: f.label, count: count(f),
                                        isOn: filter == f) { filter = f }
                         }
