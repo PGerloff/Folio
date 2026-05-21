@@ -8,15 +8,17 @@ struct ShopView: View {
     let openBook: (UUID) -> Void
 
     var body: some View {
-        NavigationStack {
+        // One filter pass per render instead of three.
+        let shopping = store.books(status: .shopping)
+        return NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    header
+                    header(shopping: shopping)
 
-                    if store.books(status: .shopping).isEmpty {
+                    if shopping.isEmpty {
                         emptyState
                     } else {
-                        ForEach(store.books(status: .shopping)) { book in
+                        ForEach(shopping) { book in
                             ShopRow(book: book,
                                     onTap: { openBook(book.id) },
                                     onBought: { store.setStatus(book.id, .toread) })
@@ -34,7 +36,7 @@ struct ShopView: View {
         }
     }
 
-    private var header: some View {
+    private func header(shopping: [Book]) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             MetaLabel(text: "Shopping list")
             HStack(alignment: .firstTextBaseline) {
@@ -43,7 +45,7 @@ struct ShopView: View {
                     .kerning(-0.7)
                     .foregroundStyle(Folio.ink1)
                 Spacer()
-                let count = store.books(status: .shopping).count
+                let count = shopping.count
                 Text("\(count) \(count == 1 ? "BOOK" : "BOOKS")")
                     .font(.folioMono(12))
                     .tracking(0.7)

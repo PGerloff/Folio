@@ -123,6 +123,11 @@ final class BookStore {
     ///
     /// Uses the medium ("M", ~180px wide) cover size to keep payloads small
     /// — typical M cover is 5–15 KB; large ("L") is 30–80 KB.
+    ///
+    /// `@MainActor` because `BookStore` is `@Observable` — all reads/writes of
+    /// `books` must happen on the main actor. The `await`s on URLSession suspend
+    /// off-main automatically, so this doesn't block the UI.
+    @MainActor
     func fetchCoverFromOpenLibrary(for bookId: UUID, title: String, author: String) async {
         // Guards
         guard let current = book(bookId), current.photoFilename == nil else { return }
@@ -154,11 +159,9 @@ final class BookStore {
               !imageData.isEmpty else { return }
 
         // Step 3 — persist, but only if the user hasn't added a photo in the
-        // meantime. Bounce to main to mutate the @Observable store consistently.
-        await MainActor.run {
-            guard let now = book(bookId), now.photoFilename == nil else { return }
-            setPhoto(bookId, data: imageData)
-        }
+        // meantime.
+        guard let now = book(bookId), now.photoFilename == nil else { return }
+        setPhoto(bookId, data: imageData)
     }
 
     func toggleFavoriteAuthor(_ name: String) {
@@ -200,20 +203,22 @@ final class BookStore {
     }
 
     private func writePhoto(data: Data, for bookId: UUID) -> String? {
-        // Re-encode as JPEG @ 0.85 to keep file size sane.
-        let normalized: Data = {
-            if let image = UIImage(data: data),
-               let jpeg = image.jpegData(compressionQuality: 0.85) {
-                return jpeg
-            }
-            return data
-        }()
+        // Re-encode as JPEG @ 0.85 to keep file size sane. If the input data
+        // isn't decodable as an image (HEIC mishap, corrupted blob, non-image
+        // bytes), fail loudly rather than persist garbage that will silently
+        // fail to render forever.
+        guard let image = UIImage(data: data),
+              let jpeg = image.jpegData(compressionQuality: 0.85) else {
+            lastErrorMessage = "Couldn't save that photo — the file wasn't a readable image."
+            return nil
+        }
         let filename = "\(bookId.uuidString).jpg"
         let url = coversDir.appendingPathComponent(filename)
         do {
-            try normalized.write(to: url, options: .atomic)
+            try jpeg.write(to: url, options: .atomic)
             return filename
         } catch {
+            lastErrorMessage = "Couldn't save that photo: \(error.localizedDescription)"
             return nil
         }
     }

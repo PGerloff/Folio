@@ -224,10 +224,13 @@ struct AddBookSheet: View {
     // MARK: - Open Library suggestions
 
     // Session-level cache — avoids re-fetching on every sheet open.
-    private static var cachedSuggestions: [BookSuggestion] = []
-    private static var cacheDate: Date?
+    // `@MainActor` because static mutable state is otherwise a Swift 6 data race;
+    // all access is from SwiftUI view code which already runs on main.
+    @MainActor private static var cachedSuggestions: [BookSuggestion] = []
+    @MainActor private static var cacheDate: Date?
     private static let cacheTTL: TimeInterval = 3600 // 1 hour
 
+    @MainActor
     private func loadSuggestions() async {
         if let date = Self.cacheDate,
            Date().timeIntervalSince(date) < Self.cacheTTL,
