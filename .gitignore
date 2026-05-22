@@ -25,3 +25,6 @@ Podfile.lock
 # Local environment
 .env
 .env.local
+
+# App Store assets (screenshots, recordings) — kept local only
+Screens/
