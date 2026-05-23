@@ -11,9 +11,11 @@ enum BookShareContent {
     /// current status and rating. Year is included in parentheses when present.
     @MainActor
     static func text(for book: Book) -> String {
-        let byline = book.year != nil
-            ? "by \(book.author) (\(book.year!))"
-            : "by \(book.author)"
+        let byline: String = if let year = book.year {
+            "by \(book.author) (\(year))"
+        } else {
+            "by \(book.author)"
+        }
 
         switch book.status {
         case .finished:

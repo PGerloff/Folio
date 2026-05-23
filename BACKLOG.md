@@ -1,9 +1,12 @@
 # Folio — Backlog
 
 Findings staged from the distinguished code review of 22 May 2026.
-The top-3 pre-submission fixes (Privacy Manifest, accessibility labels,
-PhotoPickerButton concurrency + cancel dismiss) have already shipped.
-Everything below is staged for future sessions.
+
+**Shipped:**
+- Top-3 pre-submission fixes (Privacy Manifest, accessibility labels, PhotoPickerButton concurrency + cancel dismiss) — commit `2d2f507`
+- **Sprint A** (H-1, M-1, M-2, M-5, M-6) — see commits below
+
+Everything else is staged for future sessions.
 
 Findings are tagged by severity:
 - 🔴 **HIGH** — should land before App Store 1.0
@@ -15,22 +18,13 @@ Findings are tagged by severity:
 
 ## Tier 1 — Security & Bugs (remaining)
 
-### 🔴 H-1 · Force-unwrap on Optional `book.year`
+### ✅ H-1 · Force-unwrap on Optional `book.year` — *shipped Sprint A*
 **File:** `Components/BookShareContent.swift:14–16`
-**Issue:** Safe today (nil-checked in ternary) but brittle. Any refactor that reorders the condition turns it into a runtime crash during share.
-**Fix:**
-```swift
-let byline = if let year = book.year {
-    "by \(book.author) (\(year))"
-} else {
-    "by \(book.author)"
-}
-```
+Replaced ternary with `if let` expression. Crash risk during share eliminated.
 
-### 🟠 M-1 · Empty `UIColorName` in `UILaunchScreen`
+### ✅ M-1 · Empty `UIColorName` in `UILaunchScreen` — *shipped Sprint A*
 **File:** `Info.plist:28–31`
-**Issue:** `<key>UIColorName</key><string></string>` — empty string is invalid. Causes a black launch flash on some iOS versions.
-**Fix:** Either remove `UIColorName` entirely (defaults to white) or add a `FolioBackground` named colour to the asset catalog matching `Folio.paper0` (`#F5ECD8`) and reference it here.
+Added `FolioBackground` named colour (`#F5ECD8`) to asset catalog and wired into launch screen. No more black flash on cold start.
 
 ---
 
@@ -43,14 +37,9 @@ let byline = if let year = book.year {
 - **Implement:** Add `.onLongPressGesture` to `StatusPicker` rows that surfaces `.dnf` as an extra option.
 - **Remove:** Strip `.dnf` from the model, `Theme.statusDot`, and `BookShareContent` until ready.
 
-### 🟠 M-2 · `StarsView` tap targets below 44pt HIG minimum
+### ✅ M-2 · `StarsView` tap targets below 44pt HIG minimum — *shipped Sprint A*
 **File:** `Components/StarsView.swift:29`
-**Issue:** 8pt stars with 3pt padding = 14pt tap target. 18pt stars = 24pt. Apple HIG requires 44×44pt minimum.
-**Fix:**
-```swift
-.padding(onChange != nil ? max(3, (44 - size) / 2) : 0)
-```
-Likely flagged in App Store accessibility audit.
+Padding now scales to a 44pt hit box on interactive stars; non-interactive Library tiles unaffected.
 
 ### 🟠 M-3 · Unstructured `Task` in `PhotoPickerButton` — rapid-selection race
 **File:** `Components/PhotoPickerButton.swift:39`
@@ -65,13 +54,9 @@ Likely flagged in App Store accessibility audit.
 **File:** `project.yml:3` — `bundleIdPrefix: com.folio` (stale)
 **Fix:** Change to `bundleIdPrefix: com.folioreader`. Doesn't affect current build but propagates to any future XcodeGen-derived target (widget, share extension, test target).
 
-### 🟠 M-5 · Three dead settings rows visible to TestFlight users
+### ✅ M-5 · Three dead settings rows visible to TestFlight users — *shipped Sprint A*
 **File:** `Views/YouView.swift:135–137`
-**Issue:** "Notifications", "Display & theme", "Export library" are tappable, show chevrons, do nothing.
-**Options:**
-- Implement stubs that toast "Coming soon"
-- Add a `isComingSoon: Bool` flag to `settingsRow` that greys the row and hides the chevron
-- Remove until implemented (cleanest for TestFlight)
+Notifications / Display & theme / Export library rows removed until implemented. Comment in code points back to this backlog. Clear library remains as the only settings action.
 
 ### 🟡 L-1 · `LibraryView.count(_:)` recomputes all filters per render
 **File:** `Views/LibraryView.swift:34–42`
@@ -103,10 +88,9 @@ Likely flagged in App Store accessibility audit.
 
 ## Tier 4 — UX & Branding
 
-### 🟠 M-6 · No feedback when Open Library suggestions fail
-**File:** `Views/AddBookSheet.swift:30–71`
-**Issue:** API failure → empty suggestions array silently. Users in airplane mode see a partial sheet with no explanation.
-**Fix:** Add `suggestionsError: Bool` state. When both `fetchTrending` and `fetchClassics` return empty, show: *"Couldn't load suggestions right now."*
+### ✅ M-6 · No feedback when Open Library suggestions fail — *shipped Sprint A*
+**File:** `Views/AddBookSheet.swift`
+Added `suggestionsFailed` state. When both `fetchTrending` and `fetchClassics` return empty, the section shows a dashed-border message: *"Couldn't load suggestions right now. Check your connection and try reopening."* instead of blank space.
 
 ### 🟠 M-7 · No haptic feedback on primary interactions
 **File:** `Views/BookDetailView.swift`, `Views/AddBookSheet.swift`, `Views/ShopView.swift`
@@ -128,8 +112,8 @@ Likely flagged in App Store accessibility audit.
 
 ## Suggested sequencing (for future sessions)
 
-**Sprint A — pre-1.0 must-haves (est. 1 day):**
-H-1, M-1, M-2, M-5, M-6
+**✅ Sprint A — pre-1.0 must-haves — DONE**
+H-1, M-1, M-2, M-5, M-6 shipped.
 
 **Sprint B — quality & resilience (est. 2 days):**
 H-2 (decide), M-3, M-4, L-1, L-2, L-4 (initial test target)

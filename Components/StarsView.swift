@@ -26,7 +26,9 @@ struct StarsView: View {
                 Image(systemName: i < rating ? "star.fill" : "star")
                     .font(.system(size: size))
                     .foregroundStyle(color)
-                    .padding(onChange != nil ? 3 : 0)
+                    // Interactive stars: pad to a 44pt tap target (Apple HIG).
+                    // The visual size stays as `size`; padding grows the hit box only.
+                    .padding(onChange != nil ? max(3, (44 - size) / 2) : 0)
                     .contentShape(Rectangle())
                     .onTapGesture {
                         guard let cb = onChange else { return }

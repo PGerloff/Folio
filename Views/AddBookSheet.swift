@@ -12,6 +12,7 @@ struct AddBookSheet: View {
     @State private var showManual = false
     @State private var suggestions: [BookSuggestion] = []
     @State private var suggestionsLoading = true
+    @State private var suggestionsFailed = false
 
     var body: some View {
         NavigationStack {
@@ -35,6 +36,17 @@ struct AddBookSheet: View {
                                 Spacer()
                             }
                             .padding(.vertical, 20)
+                        } else if suggestionsFailed {
+                            Text("Couldn't load suggestions right now. Check your connection and try reopening.")
+                                .font(.folioUI(13))
+                                .foregroundStyle(Folio.ink3)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.vertical, 16)
+                                .padding(.horizontal, 14)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                        .strokeBorder(Folio.paperEdge, style: StrokeStyle(lineWidth: 0.5, dash: [4]))
+                                )
                         } else {
                             VStack(spacing: 0) {
                                 ForEach(Array(suggestions.enumerated()), id: \.offset) { idx, suggestion in
@@ -247,6 +259,11 @@ struct AddBookSheet: View {
         if !result.isEmpty {
             Self.cachedSuggestions = result
             Self.cacheDate = Date()
+            suggestionsFailed = false
+        } else {
+            // Both endpoints returned nothing — almost always a network/API
+            // failure. Surface it instead of showing a blank section.
+            suggestionsFailed = true
         }
         suggestions = result
         suggestionsLoading = false

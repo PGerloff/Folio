@@ -131,9 +131,9 @@ struct YouView: View {
     private var settings: some View {
         VStack(alignment: .leading, spacing: 0) {
             MetaLabel(text: "Settings").padding(.bottom, 6)
-            settingsRow("Notifications")
-            settingsRow("Display & theme")
-            settingsRow("Export library")
+            // Notifications / Display & theme / Export library are tracked
+            // in BACKLOG.md (Sprint C+). Kept out of TestFlight builds to
+            // avoid dead-end taps generating tester noise.
             settingsRow("Clear library", isLast: true) { confirmReset = true }
         }
     }
