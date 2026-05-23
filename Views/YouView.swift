@@ -26,18 +26,18 @@ struct YouView: View {
                     favoriteAuthors
                     if !store.favorites.isEmpty { favoriteBooks }
                     settings
-                    Text("Folio · Beta")
-                        .font(.folioMono(9))
+                    Text("Bedside · Beta")
+                        .font(.bedsideMono(9))
                         .tracking(1.1)
                         .textCase(.uppercase)
-                        .foregroundStyle(Folio.ink4)
+                        .foregroundStyle(Bedside.ink4)
                         .frame(maxWidth: .infinity)
                         .padding(.top, 16)
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 14)
             }
-            .background(Folio.paper0.ignoresSafeArea())
+            .background(Bedside.paper0.ignoresSafeArea())
             .scrollIndicators(.hidden)
             .alert("Clear library?", isPresented: $confirmReset) {
                 Button("Clear all", role: .destructive) { store.resetLibrary() }
@@ -52,9 +52,9 @@ struct YouView: View {
         VStack(alignment: .leading, spacing: 6) {
             MetaLabel(text: "Profile")
             Text("You")
-                .font(.folioDisplay(36))
+                .font(.bedsideDisplay(36))
                 .kerning(-0.7)
-                .foregroundStyle(Folio.ink1)
+                .foregroundStyle(Bedside.ink1)
         }
     }
 
@@ -63,18 +63,18 @@ struct YouView: View {
             ForEach(stats, id: \.label) { stat in
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(stat.value)")
-                        .font(.folioDisplay(24))
+                        .font(.bedsideDisplay(24))
                         .kerning(-0.5)
-                        .foregroundStyle(Folio.ink1)
+                        .foregroundStyle(Bedside.ink1)
                     MetaLabel(text: stat.label)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(14)
-                .background(Folio.paper1)
+                .background(Bedside.paper1)
                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .strokeBorder(Folio.paperEdge, lineWidth: 0.5)
+                        .strokeBorder(Bedside.paperEdge, lineWidth: 0.5)
                 )
             }
         }
@@ -85,8 +85,8 @@ struct YouView: View {
             MetaLabel(text: "Favorite authors · \(store.favoriteAuthors.count)")
             if store.favoriteAuthors.isEmpty {
                 Text("Tap the heart next to an author's name on a book detail page.")
-                    .font(.folioUI(12))
-                    .foregroundStyle(Folio.ink3)
+                    .font(.bedsideUI(12))
+                    .foregroundStyle(Bedside.ink3)
             } else {
                 FlowLayout(spacing: 6) {
                     ForEach(Array(store.favoriteAuthors).sorted(), id: \.self) { name in
@@ -94,16 +94,16 @@ struct YouView: View {
                             HStack(spacing: 6) {
                                 Image(systemName: "heart.fill")
                                     .font(.system(size: 10))
-                                    .foregroundStyle(Folio.rust)
+                                    .foregroundStyle(Bedside.rust)
                                 Text(name)
                             }
-                            .font(.folioDisplay(13).italic())
-                            .foregroundStyle(Folio.ink1)
+                            .font(.bedsideDisplay(13).italic())
+                            .foregroundStyle(Bedside.ink1)
                             .padding(.horizontal, 12)
                             .frame(height: 30)
-                            .background(Folio.paper1)
+                            .background(Bedside.paper1)
                             .clipShape(Capsule())
-                            .overlay(Capsule().strokeBorder(Folio.paperEdge, lineWidth: 0.5))
+                            .overlay(Capsule().strokeBorder(Bedside.paperEdge, lineWidth: 0.5))
                         }
                         .buttonStyle(.plain)
                     }
@@ -143,18 +143,18 @@ struct YouView: View {
             action?()
         } label: {
             HStack {
-                Text(label).font(.folioUI(15)).foregroundStyle(Folio.ink1)
+                Text(label).font(.bedsideUI(15)).foregroundStyle(Bedside.ink1)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.system(size: 11))
-                    .foregroundStyle(Folio.ink3)
+                    .foregroundStyle(Bedside.ink3)
             }
             .padding(.vertical, 14)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .overlay(alignment: .bottom) {
-            if !isLast { Rectangle().fill(Folio.paperEdge).frame(height: 0.5) }
+            if !isLast { Rectangle().fill(Bedside.paperEdge).frame(height: 0.5) }
         }
     }
 }

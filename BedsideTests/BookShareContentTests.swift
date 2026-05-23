@@ -2,7 +2,7 @@
 // Unit tests for the share-text composer. Pure, deterministic, no I/O.
 
 import Testing
-@testable import Folio
+@testable import Bedside
 
 @MainActor
 struct BookShareContentTests {

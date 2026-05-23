@@ -1,4 +1,6 @@
-# Folio — Backlog
+# Bedside — Backlog
+
+> Historical entries below predate the Bedside rename (May 2026) and reference `Folio` in file paths and namespaces. Those references are accurate for the commits cited; the current code uses `Bedside` everywhere. New backlog items should use the current naming.
 
 Findings staged from the distinguished code review of 22 May 2026.
 

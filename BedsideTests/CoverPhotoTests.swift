@@ -5,7 +5,7 @@
 import Testing
 import Foundation
 import UIKit
-@testable import Folio
+@testable import Bedside
 
 @MainActor
 struct CoverPhotoTests {
@@ -14,7 +14,7 @@ struct CoverPhotoTests {
 
     private func tempDir() throws -> URL {
         let url = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-            .appendingPathComponent("FolioTests-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("BedsideTests-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return url
     }

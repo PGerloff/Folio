@@ -11,7 +11,7 @@ struct StarsView: View {
     /// Tapping the currently-set rating clears it to nil.
     var onChange: ((Int?) -> Void)?
 
-    init(rating: Int?, of: Int = 5, size: CGFloat = 12, color: Color = Folio.ink2,
+    init(rating: Int?, of: Int = 5, size: CGFloat = 12, color: Color = Bedside.ink2,
          onChange: ((Int?) -> Void)? = nil) {
         self.rating = rating ?? 0
         self.of = of

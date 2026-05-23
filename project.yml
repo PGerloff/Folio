@@ -1,4 +1,4 @@
-name: Folio
+name: Bedside
 options:
   bundleIdPrefix: com.folioreader
   deploymentTarget:
@@ -13,11 +13,11 @@ settings:
     CURRENT_PROJECT_VERSION: "1"
 
 targets:
-  Folio:
+  Bedside:
     type: application
     platform: iOS
     sources:
-      - path: FolioApp.swift
+      - path: BedsideApp.swift
       - path: PrivacyInfo.xcprivacy
       - path: Models
       - path: Store
@@ -27,6 +27,10 @@ targets:
       - path: Assets.xcassets
     settings:
       base:
+        # Bundle ID intentionally retains com.folioreader.app — chosen during
+        # the Folio → Bedside rename. Per BACKLOG/rebrand decision: switching
+        # is free pre-launch but unnecessary, and was held to keep TestFlight
+        # builds continuous.
         PRODUCT_BUNDLE_IDENTIFIER: com.folioreader.app
         INFOPLIST_FILE: Info.plist
         GENERATE_INFOPLIST_FILE: NO
@@ -37,16 +41,16 @@ targets:
       - sdk: SwiftUI.framework
       - sdk: PhotosUI.framework
 
-  FolioTests:
+  BedsideTests:
     type: bundle.unit-test
     platform: iOS
     sources:
-      - path: FolioTests
+      - path: BedsideTests
     dependencies:
-      - target: Folio
+      - target: Bedside
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
         PRODUCT_BUNDLE_IDENTIFIER: com.folioreader.app.tests
         BUNDLE_LOADER: $(TEST_HOST)
-        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Folio.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Folio
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Bedside.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Bedside

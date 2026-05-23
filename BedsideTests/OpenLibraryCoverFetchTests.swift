@@ -5,7 +5,7 @@
 import Testing
 import Foundation
 import UIKit
-@testable import Folio
+@testable import Bedside
 
 /// Serialized because all tests in this suite share `MockURLProtocol.handler`
 /// (a static) — running them in parallel would let one test's handler clobber
@@ -18,7 +18,7 @@ struct OpenLibraryCoverFetchTests {
 
     private func tempDir() throws -> URL {
         let url = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-            .appendingPathComponent("FolioTests-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("BedsideTests-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return url
     }

@@ -32,7 +32,7 @@ struct HomeView: View {
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
             }
-            .background(Folio.paper0.ignoresSafeArea())
+            .background(Bedside.paper0.ignoresSafeArea())
             .scrollIndicators(.hidden)
         }
     }
@@ -42,9 +42,9 @@ struct HomeView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
             MetaLabel(text: "Your reading")
-            Text("Folio.")
-                .font(.folioDisplay(44))
-                .foregroundStyle(Folio.ink1)
+            Text("Bedside.")
+                .font(.bedsideDisplay(44))
+                .foregroundStyle(Bedside.ink1)
                 .kerning(-1)
         }
         .padding(.top, 8)
@@ -55,7 +55,7 @@ struct HomeView: View {
             HStack(spacing: 14) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Add to shopping list")
-                        .font(.folioDisplay(18))
+                        .font(.bedsideDisplay(18))
                     MetaLabel(text: "For next time you're out")
                         .opacity(0.85)
                 }
@@ -71,7 +71,7 @@ struct HomeView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Folio.sienna)
+                    .fill(Bedside.sienna)
             )
         }
         .buttonStyle(.plain)
@@ -84,9 +84,9 @@ struct HomeView: View {
                 Spacer()
                 let count = store.books(status: .reading).count
                 Text("\(count) \(count == 1 ? "BOOK" : "BOOKS")")
-                    .font(.folioMono(10))
+                    .font(.bedsideMono(10))
                     .tracking(0.8)
-                    .foregroundStyle(Folio.ink3)
+                    .foregroundStyle(Bedside.ink3)
             }
 
             VStack(spacing: 14) {
@@ -97,30 +97,30 @@ struct HomeView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 HStack(spacing: 8) {
                                     Text(book.title)
-                                        .font(.folioDisplay(18))
-                                        .foregroundStyle(Folio.ink1)
+                                        .font(.bedsideDisplay(18))
+                                        .foregroundStyle(Bedside.ink1)
                                         .lineLimit(2)
                                     if book.isFavorite {
                                         Image(systemName: "heart.fill")
                                             .font(.system(size: 11))
-                                            .foregroundStyle(Folio.rust)
+                                            .foregroundStyle(Bedside.rust)
                                     }
                                 }
                                 Text(book.author)
-                                    .font(.folioUI(12))
-                                    .foregroundStyle(Folio.ink3)
+                                    .font(.bedsideUI(12))
+                                    .foregroundStyle(Bedside.ink3)
                             }
                             Spacer()
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 11))
-                                .foregroundStyle(Folio.ink3)
+                                .foregroundStyle(Bedside.ink3)
                         }
                         .padding(14)
-                        .background(Folio.paper1)
+                        .background(Bedside.paper1)
                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                         .overlay(
                             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .strokeBorder(Folio.paperEdge, lineWidth: 0.5)
+                                .strokeBorder(Bedside.paperEdge, lineWidth: 0.5)
                         )
                     }
                     .buttonStyle(.plain)
@@ -142,21 +142,21 @@ struct HomeView: View {
                         Text("SEE ALL · \(books.count)")
                         Image(systemName: "chevron.right").font(.system(size: 9))
                     }
-                    .font(.folioMono(10))
+                    .font(.bedsideMono(10))
                     .tracking(0.8)
-                    .foregroundStyle(Folio.ink3)
+                    .foregroundStyle(Bedside.ink3)
                 }
             }
 
             if books.isEmpty {
                 Text("Nothing yet. Tap \"Add to shopping list\" above.")
-                    .font(.folioUI(13))
-                    .foregroundStyle(Folio.ink3)
+                    .font(.bedsideUI(13))
+                    .foregroundStyle(Bedside.ink3)
                     .frame(maxWidth: .infinity)
                     .padding(18)
                     .overlay(
                         RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .strokeBorder(Folio.paperEdge, style: StrokeStyle(lineWidth: 0.5, dash: [4]))
+                            .strokeBorder(Bedside.paperEdge, style: StrokeStyle(lineWidth: 0.5, dash: [4]))
                     )
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -166,13 +166,13 @@ struct HomeView: View {
                                 VStack(alignment: .leading, spacing: 8) {
                                     CoverView(book, width: 86)
                                     Text(book.title)
-                                        .font(.folioDisplay(12))
-                                        .foregroundStyle(Folio.ink1)
+                                        .font(.bedsideDisplay(12))
+                                        .foregroundStyle(Bedside.ink1)
                                         .lineLimit(2)
                                         .frame(width: 86, alignment: .leading)
                                     Text(book.lastNameOfAuthor)
-                                        .font(.folioUI(10))
-                                        .foregroundStyle(Folio.ink3)
+                                        .font(.bedsideUI(10))
+                                        .foregroundStyle(Bedside.ink3)
                                 }
                             }
                             .buttonStyle(.plain)
@@ -194,7 +194,7 @@ struct HomeView: View {
                                 .overlay(alignment: .topTrailing) {
                                     Image(systemName: "heart.fill")
                                         .font(.system(size: 10))
-                                        .foregroundStyle(Folio.rust)
+                                        .foregroundStyle(Bedside.rust)
                                         .padding(4)
                                 }
                         }

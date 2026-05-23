@@ -1,4 +1,4 @@
-// Theme.swift — Folio palette + typography
+// Theme.swift — Bedside palette + typography
 
 import SwiftUI
 
@@ -15,7 +15,7 @@ extension Color {
 
 // MARK: - Palette
 
-enum Folio {
+enum Bedside {
     // Paper
     static let paper0    = Color(hex: 0xF5ECD8)
     static let paper1    = Color(hex: 0xEFE4CB)
@@ -64,17 +64,17 @@ enum Folio {
 
 extension Font {
     /// Display serif (New York on iOS) — closest system match to Newsreader.
-    static func folioDisplay(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
+    static func bedsideDisplay(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
         .system(size: size, weight: weight, design: .serif)
     }
 
     /// UI sans (SF Pro).
-    static func folioUI(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
+    static func bedsideUI(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
         .system(size: size, weight: weight, design: .default)
     }
 
     /// Small-caps metadata (SF Mono).
-    static func folioMono(_ size: CGFloat, weight: Font.Weight = .medium) -> Font {
+    static func bedsideMono(_ size: CGFloat, weight: Font.Weight = .medium) -> Font {
         .system(size: size, weight: weight, design: .monospaced)
     }
 }
@@ -85,9 +85,9 @@ struct MetaLabel: View {
     let text: String
     var body: some View {
         Text(text.uppercased())
-            .font(.folioMono(10, weight: .medium))
+            .font(.bedsideMono(10, weight: .medium))
             .tracking(1.4)
-            .foregroundStyle(Folio.ink3)
+            .foregroundStyle(Bedside.ink3)
     }
 }
 
@@ -95,14 +95,14 @@ struct MetaLabel: View {
 
 extension View {
     /// Inset card on paper-1 with hairline edge.
-    func folioCard(padding: CGFloat = 16) -> some View {
+    func bedsideCard(padding: CGFloat = 16) -> some View {
         self
             .padding(padding)
-            .background(Folio.paper1)
+            .background(Bedside.paper1)
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .strokeBorder(Folio.paperEdge, lineWidth: 0.5)
+                    .strokeBorder(Bedside.paperEdge, lineWidth: 0.5)
             )
     }
 }

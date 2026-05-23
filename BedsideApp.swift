@@ -1,9 +1,9 @@
-// FolioApp.swift — application entry point
+// BedsideApp.swift — application entry point
 
 import SwiftUI
 
 @main
-struct FolioApp: App {
+struct BedsideApp: App {
     @State private var store = BookStore()
 
     var body: some Scene {

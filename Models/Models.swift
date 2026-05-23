@@ -1,4 +1,4 @@
-// Models.swift — Folio data types
+// Models.swift — Bedside data types
 
 import Foundation
 

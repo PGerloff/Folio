@@ -1,5 +1,5 @@
 // BookStore.swift — observable store with file-based persistence
-// Books + favorite authors persist as JSON in Documents/folio.json.
+// Books + favorite authors persist as JSON in Documents/bedside.json.
 // Cover photos live as JPEGs in Documents/covers/<filename>.
 
 import Foundation
@@ -40,10 +40,20 @@ final class BookStore {
     init(documentsDirectory: URL? = nil, urlSession: URLSession = .shared) {
         let docs = documentsDirectory
             ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        self.storeURL = docs.appendingPathComponent("folio.json")
+        self.storeURL = docs.appendingPathComponent("bedside.json")
         self.coversDir = docs.appendingPathComponent("covers", isDirectory: true)
         self.urlSession = urlSession
         try? FileManager.default.createDirectory(at: coversDir, withIntermediateDirectories: true)
+
+        // One-time rename from the pre-Bedside library file. Only runs when
+        // the new file doesn't exist yet and the legacy one does — so it's
+        // idempotent and a no-op for new installs.
+        let legacyURL = docs.appendingPathComponent("folio.json")
+        let fm = FileManager.default
+        if !fm.fileExists(atPath: storeURL.path), fm.fileExists(atPath: legacyURL.path) {
+            try? fm.moveItem(at: legacyURL, to: storeURL)
+        }
+
         load()
     }
 

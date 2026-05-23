@@ -37,18 +37,18 @@ struct ManualEntryView: View {
                 .padding(.horizontal, 24)
                 .padding(.vertical, 14)
             }
-            .background(Folio.paper0.ignoresSafeArea())
+            .background(Bedside.paper0.ignoresSafeArea())
             .scrollIndicators(.hidden)
             .navigationTitle("Add a book")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") { dismiss() }.foregroundStyle(Folio.ink2)
+                    Button("Cancel") { dismiss() }.foregroundStyle(Bedside.ink2)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Save", action: save)
                         .fontWeight(.semibold)
-                        .foregroundStyle(canSave ? Folio.sienna : Folio.ink4)
+                        .foregroundStyle(canSave ? Bedside.sienna : Bedside.ink4)
                         .disabled(!canSave)
                 }
             }
@@ -80,23 +80,23 @@ struct ManualEntryView: View {
                     VStack(spacing: 4) {
                         Image(systemName: "camera").font(.system(size: 20))
                         Text("PHOTO")
-                            .font(.folioMono(9))
+                            .font(.bedsideMono(9))
                             .tracking(0.7)
                     }
-                    .foregroundStyle(Folio.ink3)
+                    .foregroundStyle(Bedside.ink3)
                     .frame(width: 80, height: 120)
-                    .background(Folio.paper1)
+                    .background(Bedside.paper1)
                     .overlay(
                         RoundedRectangle(cornerRadius: 3, style: .continuous)
-                            .strokeBorder(Folio.paperEdge, style: StrokeStyle(lineWidth: 0.5, dash: [4]))
+                            .strokeBorder(Bedside.paperEdge, style: StrokeStyle(lineWidth: 0.5, dash: [4]))
                     )
                 }
             }
             VStack(alignment: .leading, spacing: 4) {
                 MetaLabel(text: "Cover photo")
                 Text("Optional. Snap your copy — it'll be the cover in your library.")
-                    .font(.folioUI(12))
-                    .foregroundStyle(Folio.ink3)
+                    .font(.bedsideUI(12))
+                    .foregroundStyle(Bedside.ink3)
             }
         }
         .padding(.bottom, 6)
@@ -108,11 +108,11 @@ struct ManualEntryView: View {
             MetaLabel(text: label)
             TextField("", text: text)
                 .keyboardType(keyboard)
-                .font(display ? .folioDisplay(22) : .folioUI(15))
-                .foregroundStyle(Folio.ink1)
+                .font(display ? .bedsideDisplay(22) : .bedsideUI(15))
+                .foregroundStyle(Bedside.ink1)
                 .padding(.vertical, 10)
                 .overlay(alignment: .bottom) {
-                    Rectangle().fill(Folio.paperEdge).frame(height: 0.5)
+                    Rectangle().fill(Bedside.paperEdge).frame(height: 0.5)
                 }
         }
     }

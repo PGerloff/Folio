@@ -35,20 +35,20 @@ struct AddBookSheet: View {
                             HStack {
                                 Spacer()
                                 ProgressView()
-                                    .tint(Folio.ink3)
+                                    .tint(Bedside.ink3)
                                 Spacer()
                             }
                             .padding(.vertical, 20)
                         } else if suggestionsFailed {
                             Text("Couldn't load suggestions right now. Check your connection and try reopening.")
-                                .font(.folioUI(13))
-                                .foregroundStyle(Folio.ink3)
+                                .font(.bedsideUI(13))
+                                .foregroundStyle(Bedside.ink3)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.vertical, 16)
                                 .padding(.horizontal, 14)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                        .strokeBorder(Folio.paperEdge, style: StrokeStyle(lineWidth: 0.5, dash: [4]))
+                                        .strokeBorder(Bedside.paperEdge, style: StrokeStyle(lineWidth: 0.5, dash: [4]))
                                 )
                         } else {
                             VStack(spacing: 0) {
@@ -70,24 +70,24 @@ struct AddBookSheet: View {
                                     } label: {
                                         HStack {
                                             VStack(alignment: .leading, spacing: 2) {
-                                                Text(suggestion.title).font(.folioDisplay(15)).foregroundStyle(Folio.ink1)
-                                                Text(suggestion.author).font(.folioUI(12)).foregroundStyle(Folio.ink3)
+                                                Text(suggestion.title).font(.bedsideDisplay(15)).foregroundStyle(Bedside.ink1)
+                                                Text(suggestion.author).font(.bedsideUI(12)).foregroundStyle(Bedside.ink3)
                                             }
                                             Spacer()
                                             Image(systemName: "plus")
                                                 .font(.system(size: 14, weight: .semibold))
-                                                .foregroundStyle(Folio.paper0)
+                                                .foregroundStyle(Bedside.paper0)
                                                 .frame(width: 28, height: 28)
-                                                .background(Circle().fill(Folio.sienna))
+                                                .background(Circle().fill(Bedside.sienna))
                                         }
                                         .padding(.vertical, 12)
                                     }
                                     .buttonStyle(.plain)
                                     .overlay(alignment: .top) {
-                                        if idx == 0 { Rectangle().fill(Folio.paperEdge).frame(height: 0.5) }
+                                        if idx == 0 { Rectangle().fill(Bedside.paperEdge).frame(height: 0.5) }
                                     }
                                     .overlay(alignment: .bottom) {
-                                        Rectangle().fill(Folio.paperEdge).frame(height: 0.5)
+                                        Rectangle().fill(Bedside.paperEdge).frame(height: 0.5)
                                     }
                                 }
                             }
@@ -97,14 +97,14 @@ struct AddBookSheet: View {
                 .padding(.horizontal, 24)
                 .padding(.vertical, 8)
             }
-            .background(Folio.paper0.ignoresSafeArea())
+            .background(Bedside.paper0.ignoresSafeArea())
             .scrollIndicators(.hidden)
             .navigationTitle("Add a book")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Close") { dismiss() }
-                        .foregroundStyle(Folio.ink2)
+                        .foregroundStyle(Bedside.ink2)
                 }
             }
             .sheet(isPresented: $showManual) {
@@ -122,9 +122,9 @@ struct AddBookSheet: View {
         VStack(alignment: .leading, spacing: 4) {
             MetaLabel(text: "Quick add")
             Text("What's it called?")
-                .font(.folioDisplay(26))
+                .font(.bedsideDisplay(26))
                 .kerning(-0.5)
-                .foregroundStyle(Folio.ink1)
+                .foregroundStyle(Bedside.ink1)
         }
         .padding(.top, 4)
     }
@@ -139,10 +139,10 @@ struct AddBookSheet: View {
             .padding(4)
             .background(
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(Folio.paper1)
+                    .fill(Bedside.paper1)
                     .overlay(
                         RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .strokeBorder(Folio.paperEdge, lineWidth: 0.5)
+                            .strokeBorder(Bedside.paperEdge, lineWidth: 0.5)
                     )
             )
         }
@@ -152,23 +152,23 @@ struct AddBookSheet: View {
         let on = destination == status
         return Button { destination = status } label: {
             VStack(alignment: .leading, spacing: 2) {
-                Text(label).font(.folioUI(13, weight: .medium))
+                Text(label).font(.bedsideUI(13, weight: .medium))
                 Text(hint.uppercased())
-                    .font(.folioMono(10))
+                    .font(.bedsideMono(10))
                     .tracking(0.7)
                     .opacity(0.6)
             }
-            .foregroundStyle(on ? Folio.ink1 : Folio.ink3)
+            .foregroundStyle(on ? Bedside.ink1 : Bedside.ink3)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(
                 RoundedRectangle(cornerRadius: 7, style: .continuous)
-                    .fill(on ? Folio.paper0 : .clear)
+                    .fill(on ? Bedside.paper0 : .clear)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 7, style: .continuous)
-                    .strokeBorder(on ? Folio.paperEdge : .clear, lineWidth: 0.5)
+                    .strokeBorder(on ? Bedside.paperEdge : .clear, lineWidth: 0.5)
             )
         }
         .buttonStyle(.plain)
@@ -176,28 +176,28 @@ struct AddBookSheet: View {
 
     private var quickEntry: some View {
         HStack(spacing: 10) {
-            Image(systemName: "magnifyingglass").foregroundStyle(Folio.ink3)
+            Image(systemName: "magnifyingglass").foregroundStyle(Bedside.ink3)
             TextField("Title, or \"Title by Author\"", text: $query)
-                .font(.folioUI(14))
-                .foregroundStyle(Folio.ink1)
+                .font(.bedsideUI(14))
+                .foregroundStyle(Bedside.ink1)
                 .onSubmit { submit() }
             if !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 Button("Add", action: submit)
-                    .font(.folioUI(12, weight: .medium))
-                    .foregroundStyle(Folio.paper0)
+                    .font(.bedsideUI(12, weight: .medium))
+                    .foregroundStyle(Bedside.paper0)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(Capsule().fill(Folio.sienna))
+                    .background(Capsule().fill(Bedside.sienna))
             }
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Folio.paper1)
+                .fill(Bedside.paper1)
                 .overlay(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .strokeBorder(Folio.paperEdge, lineWidth: 0.5)
+                        .strokeBorder(Bedside.paperEdge, lineWidth: 0.5)
                 )
         )
     }
@@ -207,20 +207,20 @@ struct AddBookSheet: View {
             HStack(spacing: 12) {
                 Image(systemName: "pencil")
                     .font(.system(size: 20))
-                    .foregroundStyle(Folio.sienna)
+                    .foregroundStyle(Bedside.sienna)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Full details").font(.folioDisplay(14)).foregroundStyle(Folio.ink1)
+                    Text("Full details").font(.bedsideDisplay(14)).foregroundStyle(Bedside.ink1)
                     MetaLabel(text: "Title · author · year")
                 }
                 Spacer()
             }
             .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Folio.paper1)
+            .background(Bedside.paper1)
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .strokeBorder(Folio.paperEdge, lineWidth: 0.5)
+                    .strokeBorder(Bedside.paperEdge, lineWidth: 0.5)
             )
         }
         .buttonStyle(.plain)

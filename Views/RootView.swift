@@ -30,7 +30,7 @@ struct RootView: View {
                 .tabItem { Label("You", systemImage: "person") }
                 .tag(Tab.you)
         }
-        .tint(Folio.sienna)
+        .tint(Bedside.sienna)
         .sheet(isPresented: $showAdd) {
             AddBookSheet(onAdded: { id in
                 showAdd = false

@@ -13,16 +13,16 @@ struct StatusPicker: View {
                     status = opt
                 } label: {
                     Text(opt.label)
-                        .font(.folioUI(12, weight: .medium))
-                        .foregroundStyle(status == opt ? Folio.ink1 : Folio.ink3)
+                        .font(.bedsideUI(12, weight: .medium))
+                        .foregroundStyle(status == opt ? Bedside.ink1 : Bedside.ink3)
                         .frame(maxWidth: .infinity, minHeight: 32)
                         .background(
                             RoundedRectangle(cornerRadius: 7, style: .continuous)
-                                .fill(status == opt ? Folio.paper0 : .clear)
+                                .fill(status == opt ? Bedside.paper0 : .clear)
                         )
                         .overlay(
                             RoundedRectangle(cornerRadius: 7, style: .continuous)
-                                .strokeBorder(status == opt ? Folio.paperEdge : .clear, lineWidth: 0.5)
+                                .strokeBorder(status == opt ? Bedside.paperEdge : .clear, lineWidth: 0.5)
                         )
                 }
                 .buttonStyle(.plain)
@@ -31,10 +31,10 @@ struct StatusPicker: View {
         .padding(4)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Folio.paper1)
+                .fill(Bedside.paper1)
                 .overlay(
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .strokeBorder(Folio.paperEdge, lineWidth: 0.5)
+                        .strokeBorder(Bedside.paperEdge, lineWidth: 0.5)
                 )
         )
     }

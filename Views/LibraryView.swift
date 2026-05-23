@@ -62,9 +62,9 @@ struct LibraryView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     MetaLabel(text: "Your books")
                     Text("Library")
-                        .font(.folioDisplay(36))
+                        .font(.bedsideDisplay(36))
                         .kerning(-0.7)
-                        .foregroundStyle(Folio.ink1)
+                        .foregroundStyle(Bedside.ink1)
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 12)
@@ -85,13 +85,13 @@ struct LibraryView: View {
                     VStack {
                         Spacer(minLength: 24)
                         Text("Nothing here yet.")
-                            .font(.folioUI(13))
-                            .foregroundStyle(Folio.ink3)
+                            .font(.bedsideUI(13))
+                            .foregroundStyle(Bedside.ink3)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 32)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .strokeBorder(Folio.paperEdge, style: StrokeStyle(lineWidth: 0.5, dash: [4]))
+                                    .strokeBorder(Bedside.paperEdge, style: StrokeStyle(lineWidth: 0.5, dash: [4]))
                             )
                             .padding(.horizontal, 24)
                         Spacer()
@@ -112,7 +112,7 @@ struct LibraryView: View {
                     .scrollIndicators(.hidden)
                 }
             }
-            .background(Folio.paper0.ignoresSafeArea())
+            .background(Bedside.paper0.ignoresSafeArea())
         }
     }
 }
@@ -127,17 +127,17 @@ private struct FilterChip: View {
         Button(action: onTap) {
             HStack(spacing: 6) {
                 Text(label)
-                Text("\(count)").font(.folioMono(10)).opacity(0.6)
+                Text("\(count)").font(.bedsideMono(10)).opacity(0.6)
             }
-            .font(.folioUI(13, weight: .medium))
-            .foregroundStyle(isOn ? Folio.paper0 : Folio.ink2)
+            .font(.bedsideUI(13, weight: .medium))
+            .foregroundStyle(isOn ? Bedside.paper0 : Bedside.ink2)
             .padding(.horizontal, 13)
             .frame(height: 30)
             .background(
-                Capsule().fill(isOn ? Folio.ink1 : .clear)
+                Capsule().fill(isOn ? Bedside.ink1 : .clear)
             )
             .overlay(
-                Capsule().strokeBorder(Folio.paperEdge, lineWidth: 0.5)
+                Capsule().strokeBorder(Bedside.paperEdge, lineWidth: 0.5)
             )
         }
         .buttonStyle(.plain)
@@ -153,16 +153,16 @@ private struct LibraryTile: View {
                 CoverView(book, width: geo.size.width)
                     .overlay(alignment: .topLeading) {
                         Circle()
-                            .fill(Folio.statusDot(book.status))
+                            .fill(Bedside.statusDot(book.status))
                             .frame(width: 6, height: 6)
-                            .overlay(Circle().strokeBorder(Folio.paper0.opacity(0.8), lineWidth: 1.5))
+                            .overlay(Circle().strokeBorder(Bedside.paper0.opacity(0.8), lineWidth: 1.5))
                             .padding(6)
                     }
                     .overlay(alignment: .topTrailing) {
                         if book.isFavorite {
                             Image(systemName: "heart.fill")
                                 .font(.system(size: 10))
-                                .foregroundStyle(Folio.rust)
+                                .foregroundStyle(Bedside.rust)
                                 .padding(6)
                         }
                     }
@@ -170,14 +170,14 @@ private struct LibraryTile: View {
             .aspectRatio(2.0/3.0, contentMode: .fit)
 
             Text(book.title)
-                .font(.folioDisplay(12))
-                .foregroundStyle(Folio.ink1)
+                .font(.bedsideDisplay(12))
+                .foregroundStyle(Bedside.ink1)
                 .lineLimit(2)
             Text(book.lastNameOfAuthor)
-                .font(.folioUI(10))
-                .foregroundStyle(Folio.ink3)
+                .font(.bedsideUI(10))
+                .foregroundStyle(Bedside.ink3)
             if let rating = book.rating {
-                StarsView(rating: rating, size: 8, color: Folio.ink2)
+                StarsView(rating: rating, size: 8, color: Bedside.ink2)
             }
         }
     }

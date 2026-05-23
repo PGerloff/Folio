@@ -49,7 +49,7 @@ struct CoverView: View {
 
     private var placeholder: some View {
         ZStack {
-            Folio.coverColor(book.coverColor)
+            Bedside.coverColor(book.coverColor)
 
             // spine hint
             HStack(spacing: 0) {
@@ -60,24 +60,24 @@ struct CoverView: View {
 
             VStack(alignment: .leading) {
                 Text(book.lastNameOfAuthor.uppercased())
-                    .font(.folioMono(max(7, width * 0.038)))
+                    .font(.bedsideMono(max(7, width * 0.038)))
                     .tracking(width * 0.038 * 0.18 * 10)
-                    .foregroundStyle(Folio.coverColor(book.accentColor).opacity(0.7))
+                    .foregroundStyle(Bedside.coverColor(book.accentColor).opacity(0.7))
                 Spacer()
                 Text(book.title)
-                    .font(.folioDisplay(max(11, width * 0.135), weight: .medium))
+                    .font(.bedsideDisplay(max(11, width * 0.135), weight: .medium))
                     .lineSpacing(-2)
                     .tracking(-(width * 0.135 * 0.02))
-                    .foregroundStyle(Folio.coverColor(book.accentColor))
+                    .foregroundStyle(Bedside.coverColor(book.accentColor))
                 Spacer()
                 HStack {
                     Text("·")
                     Spacer()
                     if let year = book.year { Text(String(year)) }
                 }
-                .font(.folioMono(max(7, width * 0.034)))
+                .font(.bedsideMono(max(7, width * 0.034)))
                 .tracking(width * 0.034 * 0.18 * 10)
-                .foregroundStyle(Folio.coverColor(book.accentColor).opacity(0.55))
+                .foregroundStyle(Bedside.coverColor(book.accentColor).opacity(0.55))
             }
             .padding(EdgeInsets(top: width * 0.10, leading: width * 0.10,
                                 bottom: width * 0.12, trailing: width * 0.10))

@@ -10,7 +10,7 @@ import Foundation
 enum OpenLibrary {
     /// Identifies this app to Open Library per their guidelines.
     /// Format is: AppName/Version (contact).
-    static let userAgent = "Folio/1.0 (+https://risingtidecyber.com.au)"
+    static let userAgent = "Bedside/1.0 (+https://risingtidecyber.com.au)"
 
     /// Default request timeout. Open Library is usually fast; if a request
     /// hangs past this the user is better served by an empty result than

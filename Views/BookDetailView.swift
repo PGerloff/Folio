@@ -35,8 +35,8 @@ struct BookDetailView: View {
             // Color wash behind the hero
             LinearGradient(
                 colors: [
-                    book.photoFilename != nil ? Color.black.opacity(0.55) : Folio.coverColor(book.coverColor),
-                    Folio.paper0
+                    book.photoFilename != nil ? Color.black.opacity(0.55) : Bedside.coverColor(book.coverColor),
+                    Bedside.paper0
                 ],
                 startPoint: .top,
                 endPoint: .bottom
@@ -58,7 +58,7 @@ struct BookDetailView: View {
             }
             .scrollIndicators(.hidden)
         }
-        .background(Folio.paper0.ignoresSafeArea())
+        .background(Bedside.paper0.ignoresSafeArea())
         .sheet(isPresented: $showShare) {
             ShareSheetLoader(book: book, store: store)
         }
@@ -83,7 +83,7 @@ struct BookDetailView: View {
                              accessibilityLabel: "Back") { dismiss() }
             Spacer()
             CircleIconButton(systemName: book.isFavorite ? "heart.fill" : "heart",
-                             tint: book.isFavorite ? Folio.rust : Folio.ink1,
+                             tint: book.isFavorite ? Bedside.rust : Bedside.ink1,
                              accessibilityLabel: book.isFavorite ? "Remove from favourites" : "Add to favourites") {
                 store.toggleFavorite(book.id)
             }
@@ -109,10 +109,10 @@ struct BookDetailView: View {
             PhotoPickerButton(onPick: { data in store.setPhoto(book.id, data: data) }) {
                 Image(systemName: "camera.fill")
                     .font(.system(size: 17, weight: .medium))
-                    .foregroundStyle(Folio.paper0)
+                    .foregroundStyle(Bedside.paper0)
                     .frame(width: 38, height: 38)
-                    .background(Circle().fill(Folio.ink1))
-                    .overlay(Circle().strokeBorder(Folio.paper0, lineWidth: 2))
+                    .background(Circle().fill(Bedside.ink1))
+                    .overlay(Circle().strokeBorder(Bedside.paper0, lineWidth: 2))
                     .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 4)
             }
             .offset(x: 10, y: 10)
@@ -126,10 +126,10 @@ struct BookDetailView: View {
                 } label: {
                     Image(systemName: "xmark")
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(Folio.paper0)
+                        .foregroundStyle(Bedside.paper0)
                         .frame(width: 26, height: 26)
-                        .background(Circle().fill(Folio.ink1.opacity(0.85)))
-                        .overlay(Circle().strokeBorder(Folio.paper0, lineWidth: 2))
+                        .background(Circle().fill(Bedside.ink1.opacity(0.85)))
+                        .overlay(Circle().strokeBorder(Bedside.paper0, lineWidth: 2))
                 }
                 .buttonStyle(.plain)
                 .offset(x: -90, y: 8) // hover near top-right of the 150-wide cover
@@ -140,15 +140,15 @@ struct BookDetailView: View {
     private func titleBlock(book: Book) -> some View {
         VStack(spacing: 6) {
             Text(book.title)
-                .font(.folioDisplay(28))
+                .font(.bedsideDisplay(28))
                 .kerning(-0.5)
-                .foregroundStyle(Folio.ink1)
+                .foregroundStyle(Bedside.ink1)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
 
             HStack(spacing: 6) {
-                Text("by ").foregroundStyle(Folio.ink2) +
-                Text(book.author).italic().foregroundStyle(Folio.ink2)
+                Text("by ").foregroundStyle(Bedside.ink2) +
+                Text(book.author).italic().foregroundStyle(Bedside.ink2)
 
                 Button {
                     store.toggleFavoriteAuthor(book.author)
@@ -156,11 +156,11 @@ struct BookDetailView: View {
                     let isFav = store.favoriteAuthors.contains(book.author)
                     Image(systemName: isFav ? "heart.fill" : "heart")
                         .font(.system(size: 11))
-                        .foregroundStyle(isFav ? Folio.rust : Folio.ink3)
+                        .foregroundStyle(isFav ? Bedside.rust : Bedside.ink3)
                 }
                 .buttonStyle(.plain)
             }
-            .font(.folioDisplay(14))
+            .font(.bedsideDisplay(14))
 
             if let year = book.year {
                 MetaLabel(text: String(year))
@@ -189,7 +189,7 @@ struct BookDetailView: View {
             VStack(alignment: .leading, spacing: 6) {
                 MetaLabel(text: "Your rating")
                 StarsView(rating: book.rating, size: 18,
-                          color: book.rating == nil ? Folio.ink4 : Folio.sienna) { newValue in
+                          color: book.rating == nil ? Bedside.ink4 : Bedside.sienna) { newValue in
                     store.setRating(book.id, newValue)
                 }
             }
@@ -198,7 +198,7 @@ struct BookDetailView: View {
                 MetaLabel(text: date)
             }
         }
-        .folioCard()
+        .bedsideCard()
         .padding(.horizontal, 24)
         .padding(.top, 22)
     }
@@ -212,8 +212,8 @@ struct BookDetailView: View {
                 TextField("A thought, a quote, a margin scribble…",
                           text: $noteDraft, axis: .vertical)
                     .lineLimit(2...5)
-                    .font(.folioUI(14))
-                    .foregroundStyle(Folio.ink1)
+                    .font(.bedsideUI(14))
+                    .foregroundStyle(Bedside.ink1)
                     .padding(.bottom, 4)
 
                 Button {
@@ -223,40 +223,40 @@ struct BookDetailView: View {
                     noteDraft = ""
                 } label: {
                     Text("Add note")
-                        .font(.folioUI(12, weight: .medium))
-                        .foregroundStyle(noteDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Folio.ink3 : Folio.paper0)
+                        .font(.bedsideUI(12, weight: .medium))
+                        .foregroundStyle(noteDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Bedside.ink3 : Bedside.paper0)
                         .padding(.horizontal, 14)
                         .padding(.vertical, 6)
                         .background(
-                            Capsule().fill(noteDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Folio.paper2 : Folio.sienna)
+                            Capsule().fill(noteDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Bedside.paper2 : Bedside.sienna)
                         )
                 }
                 .buttonStyle(.plain)
                 .disabled(noteDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
-            .folioCard(padding: 14)
+            .bedsideCard(padding: 14)
 
             ForEach(book.notes) { note in
                 HStack(alignment: .top, spacing: 12) {
-                    Rectangle().fill(Folio.sienna).frame(width: 2)
+                    Rectangle().fill(Bedside.sienna).frame(width: 2)
                     VStack(alignment: .leading, spacing: 8) {
                         Text(note.text)
-                            .font(.folioUI(14))
-                            .foregroundStyle(Folio.ink1)
+                            .font(.bedsideUI(14))
+                            .foregroundStyle(Bedside.ink1)
                             .fixedSize(horizontal: false, vertical: true)
                         HStack {
                             Text(note.date.formatted(.dateTime.month(.abbreviated).day()))
-                                .font(.folioMono(9))
+                                .font(.bedsideMono(9))
                                 .tracking(0.7)
                                 .textCase(.uppercase)
-                                .foregroundStyle(Folio.ink4)
+                                .foregroundStyle(Bedside.ink4)
                             Spacer()
                             Button {
                                 store.removeNote(book.id, noteId: note.id)
                             } label: {
                                 Image(systemName: "trash")
                                     .font(.system(size: 12))
-                                    .foregroundStyle(Folio.ink4)
+                                    .foregroundStyle(Bedside.ink4)
                             }
                             .buttonStyle(.plain)
                         }
@@ -264,7 +264,7 @@ struct BookDetailView: View {
                     .padding(.vertical, 12)
                     .padding(.trailing, 14)
                 }
-                .background(Folio.paper1)
+                .background(Bedside.paper1)
                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             }
         }
@@ -304,7 +304,7 @@ private struct ShareSheetLoader: View {
 
 private struct CircleIconButton: View {
     let systemName: String
-    var tint: Color = Folio.ink1
+    var tint: Color = Bedside.ink1
     var background: Color? = nil
     let accessibilityLabel: String
     let action: () -> Void
@@ -317,7 +317,7 @@ private struct CircleIconButton: View {
                 .frame(width: 36, height: 36)
                 .background(
                     Circle()
-                        .fill(background ?? Folio.paper0.opacity(0.6))
+                        .fill(background ?? Bedside.paper0.opacity(0.6))
                 )
         }
         .buttonStyle(.plain)

@@ -5,7 +5,7 @@
 
 import Testing
 import Foundation
-@testable import Folio
+@testable import Bedside
 
 @MainActor
 struct BookStorePersistenceTests {
@@ -16,7 +16,7 @@ struct BookStorePersistenceTests {
     /// The directory is removed at the end of the test scope.
     private func tempDir() throws -> URL {
         let url = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-            .appendingPathComponent("FolioTests-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("BedsideTests-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return url
     }
@@ -125,7 +125,7 @@ struct BookStorePersistenceTests {
         defer { cleanup(dir) }
 
         // Write garbage to the store file before any BookStore touches it.
-        let storeURL = dir.appendingPathComponent("folio.json")
+        let storeURL = dir.appendingPathComponent("bedside.json")
         try "this is not valid JSON".write(to: storeURL, atomically: true, encoding: .utf8)
 
         let store = BookStore(documentsDirectory: dir)
@@ -138,8 +138,35 @@ struct BookStorePersistenceTests {
 
         // A backup file should exist with the original garbage preserved.
         let contents = try FileManager.default.contentsOfDirectory(atPath: dir.path)
-        let backups = contents.filter { $0.hasPrefix("folio.corrupted-") && $0.hasSuffix(".json") }
+        let backups = contents.filter { $0.hasPrefix("bedside.corrupted-") && $0.hasSuffix(".json") }
         #expect(backups.count == 1, "expected exactly one backup file")
+    }
+
+    @Test("Legacy folio.json is migrated to bedside.json on first launch")
+    func legacyFileMigration() throws {
+        let dir = try tempDir()
+        defer { cleanup(dir) }
+
+        // Seed a legacy folio.json by creating a store with the old name,
+        // saving data, then writing those bytes back as folio.json before
+        // the migrating store starts.
+        let seed = BookStore(documentsDirectory: dir)
+        _ = seed.addBook(title: "Migrated Book", author: "An Old Friend", status: .reading)
+        let bedsideURL = dir.appendingPathComponent("bedside.json")
+        let legacyURL = dir.appendingPathComponent("folio.json")
+        try FileManager.default.moveItem(at: bedsideURL, to: legacyURL)
+
+        // Sanity check: bedside.json missing, folio.json present.
+        #expect(!FileManager.default.fileExists(atPath: bedsideURL.path))
+        #expect(FileManager.default.fileExists(atPath: legacyURL.path))
+
+        // A new store should migrate the legacy file in and read the data.
+        let migrated = BookStore(documentsDirectory: dir)
+        #expect(migrated.books.count == 1)
+        #expect(migrated.books.first?.title == "Migrated Book")
+        // After migration, the legacy file is gone and the new one exists.
+        #expect(FileManager.default.fileExists(atPath: bedsideURL.path))
+        #expect(!FileManager.default.fileExists(atPath: legacyURL.path))
     }
 
     @Test("First launch (no file) loads an empty library cleanly")
