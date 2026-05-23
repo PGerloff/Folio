@@ -28,8 +28,11 @@ final class BookStore {
         return c
     }()
 
-    init() {
-        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    /// - Parameter documentsDirectory: Override the documents directory for
+    ///   testing. In production this stays nil and the real Documents/ is used.
+    init(documentsDirectory: URL? = nil) {
+        let docs = documentsDirectory
+            ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         self.storeURL = docs.appendingPathComponent("folio.json")
         self.coversDir = docs.appendingPathComponent("covers", isDirectory: true)
         try? FileManager.default.createDirectory(at: coversDir, withIntermediateDirectories: true)

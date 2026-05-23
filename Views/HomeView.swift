@@ -9,7 +9,10 @@ struct HomeView: View {
     let switchTo: (Tab) -> Void
 
     var body: some View {
-        NavigationStack {
+        // Compute once per render — used both as a visibility gate and as the
+        // section's data source.
+        let finishedFavourites = store.favorites.filter { $0.status == .finished }
+        return NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
                     header
@@ -22,8 +25,8 @@ struct HomeView: View {
 
                     shoppingPreview
 
-                    if !store.favorites.filter({ $0.status == .finished }).isEmpty {
-                        favorites
+                    if !finishedFavourites.isEmpty {
+                        favoritesSection(finishedFavourites)
                     }
                 }
                 .padding(.horizontal, 24)
@@ -180,9 +183,8 @@ struct HomeView: View {
         }
     }
 
-    private var favorites: some View {
-        let favs = store.favorites.filter { $0.status == .finished }
-        return VStack(alignment: .leading, spacing: 14) {
+    private func favoritesSection(_ favs: [Book]) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
             MetaLabel(text: "Favorites")
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {

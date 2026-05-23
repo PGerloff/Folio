@@ -23,8 +23,8 @@ enum BookStatus: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    /// The four statuses surfaced in pickers (DNF is reachable only via long-press).
-    static let pickable: [BookStatus] = [.shopping, .toread, .reading, .finished]
+    /// All statuses surfaced in pickers, in reading-flow order.
+    static let pickable: [BookStatus] = [.shopping, .toread, .reading, .dnf, .finished]
 }
 
 // MARK: - Cover color (placeholder tiles)

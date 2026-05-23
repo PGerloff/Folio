@@ -4,7 +4,8 @@ Findings staged from the distinguished code review of 22 May 2026.
 
 **Shipped:**
 - Top-3 pre-submission fixes (Privacy Manifest, accessibility labels, PhotoPickerButton concurrency + cancel dismiss) — commit `2d2f507`
-- **Sprint A** (H-1, M-1, M-2, M-5, M-6) — see commits below
+- **Sprint A** (H-1, M-1, M-2, M-5, M-6) — commit `f79233d`
+- **Sprint B** (H-2, M-3, M-4, L-1, L-2, L-4) — see latest commit
 
 Everything else is staged for future sessions.
 
@@ -30,54 +31,46 @@ Added `FolioBackground` named colour (`#F5ECD8`) to asset catalog and wired into
 
 ## Tier 2 — Stability (remaining)
 
-### 🔴 H-2 · `BookStatus.dnf` is unreachable
-**File:** `Models/Models.swift:27` + entire Views layer
-**Issue:** `.dnf` exists in the model, has a status dot colour, appears in share text, and counts toward filters — but `StatusPicker` only shows the four `.pickable` statuses and no long-press handler exists anywhere. Comment promises long-press; no implementation.
-**Options:**
-- **Implement:** Add `.onLongPressGesture` to `StatusPicker` rows that surfaces `.dnf` as an extra option.
-- **Remove:** Strip `.dnf` from the model, `Theme.statusDot`, and `BookShareContent` until ready.
+### ✅ H-2 · `BookStatus.dnf` is unreachable — *shipped Sprint B*
+**File:** `Models/Models.swift:27`
+Added `.dnf` to `BookStatus.pickable` between `.reading` and `.finished`. The Paused chip is now visible in `StatusPicker` everywhere it's used. Reading-flow order: Shop → To Read → Reading → Paused → Finished.
 
 ### ✅ M-2 · `StarsView` tap targets below 44pt HIG minimum — *shipped Sprint A*
 **File:** `Components/StarsView.swift:29`
 Padding now scales to a 44pt hit box on interactive stars; non-interactive Library tiles unaffected.
 
-### 🟠 M-3 · Unstructured `Task` in `PhotoPickerButton` — rapid-selection race
-**File:** `Components/PhotoPickerButton.swift:39`
-**Issue:** New `Task {}` fires on each `.onChange(of: pickerItem)`. Rapid selection runs multiple concurrent tasks, each writing a photo + mutating `BookStore`.
-**Fix:** Switch the entire pattern to `.task(id: pickerItem)` which auto-cancels previous tasks on change.
+### ✅ M-3 · Unstructured `Task` in `PhotoPickerButton` — *shipped Sprint B*
+**File:** `Components/PhotoPickerButton.swift`
+Replaced `.onChange(of:) { Task { … } }` with `.task(id: pickerItem) { … }`. Rapid successive selections now auto-cancel the previous task before starting a new one; @State writes stay on MainActor for free.
 
 ---
 
 ## Tier 3 — Efficiency & Code Health
 
-### 🟠 M-4 · `bundleIdPrefix` mismatch in `project.yml`
-**File:** `project.yml:3` — `bundleIdPrefix: com.folio` (stale)
-**Fix:** Change to `bundleIdPrefix: com.folioreader`. Doesn't affect current build but propagates to any future XcodeGen-derived target (widget, share extension, test target).
+### ✅ M-4 · `bundleIdPrefix` mismatch in `project.yml` — *shipped Sprint B*
+**File:** `project.yml:3`
+Changed to `bundleIdPrefix: com.folioreader`. New `FolioTests` target shipped with the correct `com.folioreader.app.tests` bundle ID as a consequence.
 
 ### ✅ M-5 · Three dead settings rows visible to TestFlight users — *shipped Sprint A*
 **File:** `Views/YouView.swift:135–137`
 Notifications / Display & theme / Export library rows removed until implemented. Comment in code points back to this backlog. Clear library remains as the only settings action.
 
-### 🟡 L-1 · `LibraryView.count(_:)` recomputes all filters per render
-**File:** `Views/LibraryView.swift:34–42`
-**Issue:** 5 chips × full filter pass each. Already noted in a prior review and still unfixed.
-**Fix:** Lift counts to a `chipCounts: [Filter: Int]` computed property called once per body render.
+### ✅ L-1 · `LibraryView.count(_:)` recomputes all filters per render — *shipped Sprint B*
+**File:** `Views/LibraryView.swift`
+Replaced 5 separate filter passes with a single `chipCounts: [Filter: Int]` computed in one loop through `store.owned`. Cached in the `body` so all 5 chips read from the same dict.
 
-### 🟡 L-2 · `HomeView` computes favourite-finished filter twice
-**File:** `Views/HomeView.swift:25, 184`
-**Fix:** Compute `store.favorites.filter { $0.status == .finished }` once and pass into the section builder.
+### ✅ L-2 · `HomeView` computes favourite-finished filter twice — *shipped Sprint B*
+**File:** `Views/HomeView.swift`
+Filter lifted once at the top of `body` and passed into the section builder (renamed `favoritesSection(_:)`).
 
 ### 🟡 L-3 · `SWIFT_VERSION: "5.9"` misses Swift 6 concurrency diagnostics
 **File:** `project.yml:11`
 **Recommendation:** Upgrade to `SWIFT_VERSION: "6.0"`. Existing `@MainActor` annotations are already correct; migration cost should be low. Strict concurrency would have caught the `pickerItem` bug pre-review.
 
-### 🟡 L-4 · No tests
-**File:** Entire project
-**Highest-value tests to add first:**
-1. `BookStorePersistenceTests` — save → terminate → reload round-trip
-2. `BookShareContentTests` — `text(for:)` output for each status × rating combination
-3. Cover photo write/read round-trip
-**Fix:** Add a `FolioTests` target to `project.yml` and stub one test before TestFlight build 0.2.0.
+### ✅ L-4 · No tests — *shipped Sprint B (initial coverage)*
+**File:** `FolioTests/`
+Added `FolioTests` target using Swift Testing framework. `BookStorePersistenceTests.swift` covers 7 tests: add round-trip, update round-trip, remove round-trip, notes round-trip, favourite authors round-trip, corrupted-JSON backup behaviour, and clean first-launch. Tests run in isolated temp directories via `BookStore(documentsDirectory:)`.
+**Remaining (deferred):** `BookShareContentTests` and cover photo round-trip — re-list as a Sprint C+ item if needed.
 
 ### 💡 S-1 · No schema migration strategy for `BookStore`
 **File:** `Store/BookStore.swift:243–266`
@@ -115,11 +108,11 @@ Added `suggestionsFailed` state. When both `fetchTrending` and `fetchClassics` r
 **✅ Sprint A — pre-1.0 must-haves — DONE**
 H-1, M-1, M-2, M-5, M-6 shipped.
 
-**Sprint B — quality & resilience (est. 2 days):**
-H-2 (decide), M-3, M-4, L-1, L-2, L-4 (initial test target)
+**✅ Sprint B — quality & resilience — DONE**
+H-2, M-3, M-4, L-1, L-2, L-4 shipped.
 
 **Sprint C — polish (est. 2–3 days):**
-M-7, L-5
+M-7, L-5, expanded test coverage (BookShareContent, cover photos)
 
 **Sprint D — feature (own work item):**
 M-8 (dark mode design + implementation)

@@ -31,14 +31,23 @@ struct LibraryView: View {
         }
     }
 
-    private func count(_ f: Filter) -> Int {
-        switch f {
-        case .all:       return store.owned.count
-        case .toread:    return store.books(status: .toread).count
-        case .reading:   return store.books(status: .reading).count
-        case .finished:  return store.books(status: .finished).count
-        case .favorites: return store.owned.filter { $0.isFavorite }.count
+    /// One pass through `owned` covers every chip's count, instead of five
+    /// independent O(n) filter passes per render.
+    private var chipCounts: [Filter: Int] {
+        let owned = store.owned
+        var counts: [Filter: Int] = [.all: owned.count,
+                                     .toread: 0, .reading: 0,
+                                     .finished: 0, .favorites: 0]
+        for book in owned {
+            if book.isFavorite { counts[.favorites, default: 0] += 1 }
+            switch book.status {
+            case .toread:   counts[.toread, default: 0] += 1
+            case .reading:  counts[.reading, default: 0] += 1
+            case .finished: counts[.finished, default: 0] += 1
+            default: break
+            }
         }
+        return counts
     }
 
     private let cols = [GridItem(.flexible(), spacing: 18),
@@ -46,7 +55,9 @@ struct LibraryView: View {
                         GridItem(.flexible(), spacing: 18)]
 
     var body: some View {
-        NavigationStack {
+        // Cache the counts dict for this render — used by every chip.
+        let counts = chipCounts
+        return NavigationStack {
             VStack(alignment: .leading, spacing: 0) {
                 VStack(alignment: .leading, spacing: 6) {
                     MetaLabel(text: "Your books")
@@ -62,7 +73,7 @@ struct LibraryView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 6) {
                         ForEach([Filter.all, .toread, .reading, .favorites, .finished], id: \.self) { f in
-                            FilterChip(label: f.label, count: count(f),
+                            FilterChip(label: f.label, count: counts[f] ?? 0,
                                        isOn: filter == f) { filter = f }
                         }
                     }

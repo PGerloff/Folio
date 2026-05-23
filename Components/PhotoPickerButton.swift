@@ -36,15 +36,15 @@ struct PhotoPickerButton<Label: View>: View {
             .ignoresSafeArea()
         }
         .photosPicker(isPresented: $showLibrary, selection: $pickerItem, matching: .images, photoLibrary: .shared())
-        .onChange(of: pickerItem) { _, newItem in
-            guard let newItem else { return }
-            Task {
-                if let data = try? await newItem.loadTransferable(type: Data.self) {
-                    await MainActor.run { onPick(data) }
-                }
-                // @State mutation must be on the main actor.
-                await MainActor.run { pickerItem = nil }
+        // `.task(id:)` auto-cancels the previous task when `pickerItem` changes,
+        // so rapid successive selections can't race each other. Runs on the
+        // view's MainActor by default, making @State writes safe.
+        .task(id: pickerItem) {
+            guard let item = pickerItem else { return }
+            if let data = try? await item.loadTransferable(type: Data.self) {
+                onPick(data)
             }
+            pickerItem = nil
         }
     }
 }
