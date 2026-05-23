@@ -18,6 +18,7 @@ targets:
     platform: iOS
     sources:
       - path: FolioApp.swift
+      - path: PrivacyInfo.xcprivacy
       - path: Models
       - path: Store
       - path: Theme

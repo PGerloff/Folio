@@ -75,16 +75,20 @@ struct BookDetailView: View {
 
     private func navRow(book: Book) -> some View {
         HStack {
-            CircleIconButton(systemName: "chevron.left") { dismiss() }
+            CircleIconButton(systemName: "chevron.left",
+                             accessibilityLabel: "Back") { dismiss() }
             Spacer()
             CircleIconButton(systemName: book.isFavorite ? "heart.fill" : "heart",
-                             tint: book.isFavorite ? Folio.rust : Folio.ink1) {
+                             tint: book.isFavorite ? Folio.rust : Folio.ink1,
+                             accessibilityLabel: book.isFavorite ? "Remove from favourites" : "Add to favourites") {
                 store.toggleFavorite(book.id)
             }
-            CircleIconButton(systemName: "square.and.arrow.up") {
+            CircleIconButton(systemName: "square.and.arrow.up",
+                             accessibilityLabel: "Share book") {
                 showShare = true
             }
-            CircleIconButton(systemName: "trash") {
+            CircleIconButton(systemName: "trash",
+                             accessibilityLabel: "Delete book") {
                 showDeleteAlert = true
             }
         }
@@ -298,6 +302,7 @@ private struct CircleIconButton: View {
     let systemName: String
     var tint: Color = Folio.ink1
     var background: Color? = nil
+    let accessibilityLabel: String
     let action: () -> Void
 
     var body: some View {
@@ -312,5 +317,6 @@ private struct CircleIconButton: View {
                 )
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(accessibilityLabel)
     }
 }

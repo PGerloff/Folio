@@ -42,7 +42,8 @@ struct PhotoPickerButton<Label: View>: View {
                 if let data = try? await newItem.loadTransferable(type: Data.self) {
                     await MainActor.run { onPick(data) }
                 }
-                pickerItem = nil
+                // @State mutation must be on the main actor.
+                await MainActor.run { pickerItem = nil }
             }
         }
     }
@@ -72,10 +73,14 @@ private struct CameraSheet: UIViewControllerRepresentable {
                                    didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             let image = info[.originalImage] as? UIImage
             let data = image?.jpegData(compressionQuality: 0.9)
+            picker.dismiss(animated: true)
             onResult(data)
         }
 
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            // UIKit convention: delegate must dismiss the picker.
+            // Without this, the camera UI freezes for a frame on Cancel.
+            picker.dismiss(animated: true)
             onResult(nil)
         }
     }

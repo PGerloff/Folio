@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Folio does not track users. -->
+    <key>NSPrivacyTracking</key>
+    <false/>
+
+    <!-- Folio does not contact any domains for tracking. -->
+    <key>NSPrivacyTrackingDomains</key>
+    <array/>
+
+    <!-- Folio does not collect any user data. The library is stored
+         entirely on-device and never transmitted. Open Library API calls
+         send only book titles and authors typed by the user. -->
+    <key>NSPrivacyCollectedDataTypes</key>
+    <array/>
+
+    <!-- Folio does not call any of Apple's required-reason APIs
+         (UserDefaults, file timestamps, system boot time, disk space,
+         active keyboards). Basic FileManager read/write operations
+         used for JSON persistence do not require declaration. -->
+    <key>NSPrivacyAccessedAPITypes</key>
+    <array/>
+</dict>
+</plist>
