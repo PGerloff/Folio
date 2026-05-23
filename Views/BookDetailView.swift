@@ -71,6 +71,10 @@ struct BookDetailView: View {
         } message: {
             Text("This will permanently delete the book from your library.")
         }
+        // Haptic feedback on meaningful state changes
+        .sensoryFeedback(.impact(weight: .light), trigger: book.isFavorite)
+        .sensoryFeedback(.impact(weight: .light), trigger: book.rating)
+        .sensoryFeedback(.success, trigger: book.status == .finished)
     }
 
     private func navRow(book: Book) -> some View {

@@ -5,7 +5,8 @@ Findings staged from the distinguished code review of 22 May 2026.
 **Shipped:**
 - Top-3 pre-submission fixes (Privacy Manifest, accessibility labels, PhotoPickerButton concurrency + cancel dismiss) — commit `2d2f507`
 - **Sprint A** (H-1, M-1, M-2, M-5, M-6) — commit `f79233d`
-- **Sprint B** (H-2, M-3, M-4, L-1, L-2, L-4) — see latest commit
+- **Sprint B** (H-2, M-3, M-4, L-1, L-2, L-4) — commit `0b9ef1d`
+- **Sprint C** (M-7, L-5, expanded test coverage) — see latest commit
 
 Everything else is staged for future sessions.
 
@@ -67,10 +68,12 @@ Filter lifted once at the top of `body` and passed into the section builder (ren
 **File:** `project.yml:11`
 **Recommendation:** Upgrade to `SWIFT_VERSION: "6.0"`. Existing `@MainActor` annotations are already correct; migration cost should be low. Strict concurrency would have caught the `pickerItem` bug pre-review.
 
-### ✅ L-4 · No tests — *shipped Sprint B (initial coverage)*
+### ✅ L-4 · No tests — *shipped Sprint B + C*
 **File:** `FolioTests/`
-Added `FolioTests` target using Swift Testing framework. `BookStorePersistenceTests.swift` covers 7 tests: add round-trip, update round-trip, remove round-trip, notes round-trip, favourite authors round-trip, corrupted-JSON backup behaviour, and clean first-launch. Tests run in isolated temp directories via `BookStore(documentsDirectory:)`.
-**Remaining (deferred):** `BookShareContentTests` and cover photo round-trip — re-list as a Sprint C+ item if needed.
+- **Sprint B** added the `FolioTests` target using Swift Testing and `BookStorePersistenceTests.swift` (7 tests).
+- **Sprint C** added `BookShareContentTests.swift`, `CoverPhotoTests.swift`, and `OpenLibraryCoverFetchTests.swift` with a `MockURLProtocol` stub on an injected URLSession. Total across all four suites: **29 tests passing in 0.45s**.
+- `BookStore.init` now takes optional `documentsDirectory` and `urlSession` parameters for isolation in tests.
+- OL fetch suite is marked `@Suite(.serialized)` because its tests share a static mock handler; image tests use thread-safe `UIGraphicsImageRenderer` (the legacy `UIGraphicsBeginImageContext` API races under parallel test execution).
 
 ### 💡 S-1 · No schema migration strategy for `BookStore`
 **File:** `Store/BookStore.swift:243–266`
@@ -85,10 +88,9 @@ Added `FolioTests` target using Swift Testing framework. `BookStorePersistenceTe
 **File:** `Views/AddBookSheet.swift`
 Added `suggestionsFailed` state. When both `fetchTrending` and `fetchClassics` return empty, the section shows a dashed-border message: *"Couldn't load suggestions right now. Check your connection and try reopening."* instead of blank space.
 
-### 🟠 M-7 · No haptic feedback on primary interactions
-**File:** `Views/BookDetailView.swift`, `Views/AddBookSheet.swift`, `Views/ShopView.swift`
-**Issue:** Adding a book, toggling favourite, rating a book, marking as bought — none produce haptics.
-**Fix:** Use `.sensoryFeedback(.impact(weight: .light), trigger: …)` on key state changes. iOS 17+ API, drop-in.
+### ✅ M-7 · No haptic feedback on primary interactions — *shipped Sprint C*
+**Files:** `Views/BookDetailView.swift`, `Views/AddBookSheet.swift`, `Views/ShopView.swift`
+Mapping: `.impact(weight: .light)` for favourite toggle, rating change, and book added; `.success` for marking finished and marking as bought. All wired via iOS 17 `.sensoryFeedback` modifier.
 
 ### 🟠 M-8 · Dark mode hard-locked off
 **File:** `FolioApp.swift:13` — `.preferredColorScheme(.light)`
@@ -96,10 +98,9 @@ Added `suggestionsFailed` state. When both `fetchTrending` and `fetchClassics` r
 **Scope:** Real design work — needs dark variants of every `paper*`, `ink*`, and accent colour in `Theme.swift`.
 **Interim:** Add a TestFlight release note acknowledging light-only.
 
-### 🟡 L-5 · Cover fetch produces a visual "pop" in BookDetailView
-**File:** `Views/BookDetailView.swift:88–123`
-**Issue:** When a book is added without a photo, the detail view opens with the placeholder tile; the auto-fetched cover appears 1–8 seconds later with no transition.
-**Fix:** Apply `.redacted(reason: .placeholder)` on `CoverView` while `book.photoFilename == nil && isFetching`. Requires plumbing an `isFetching` state into the store keyed by book id.
+### ✅ L-5 · Cover fetch produces a visual "pop" in BookDetailView — *shipped Sprint C*
+**File:** `Components/CoverView.swift`
+`CoverView` now renders the placeholder underneath and cross-fades the photo in via `.transition(.opacity)` + `.animation(.easeInOut(duration: 0.4), value: book.photoFilename)`. No store changes required.
 
 ---
 
@@ -111,8 +112,8 @@ H-1, M-1, M-2, M-5, M-6 shipped.
 **✅ Sprint B — quality & resilience — DONE**
 H-2, M-3, M-4, L-1, L-2, L-4 shipped.
 
-**Sprint C — polish (est. 2–3 days):**
-M-7, L-5, expanded test coverage (BookShareContent, cover photos)
+**✅ Sprint C — polish — DONE**
+M-7, L-5, and expanded test coverage shipped. 29 tests passing.
 
 **Sprint D — feature (own work item):**
 M-8 (dark mode design + implementation)

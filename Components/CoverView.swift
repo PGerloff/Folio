@@ -15,15 +15,20 @@ struct CoverView: View {
     }
 
     var body: some View {
-        Group {
+        ZStack {
+            // Placeholder always rendered underneath; real photo fades in on top.
+            // This produces a smooth cross-fade when an Open Library cover arrives
+            // (L-5) instead of the previous instant "pop".
+            placeholder
+
             if let name = book.photoFilename, let uiImage = store.loadCoverImage(name) {
                 Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFill()
-            } else {
-                placeholder
+                    .transition(.opacity)
             }
         }
+        .animation(.easeInOut(duration: 0.4), value: book.photoFilename)
         .frame(width: width, height: width * 1.5)
         .clipShape(RoundedRectangle(cornerRadius: 3, style: .continuous))
         .overlay(

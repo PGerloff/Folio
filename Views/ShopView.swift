@@ -33,6 +33,8 @@ struct ShopView: View {
             }
             .background(Folio.paper0.ignoresSafeArea())
             .scrollIndicators(.hidden)
+            // Success haptic when a shopping-list item is moved to To Read.
+            .sensoryFeedback(.success, trigger: shopping.count)
         }
     }
 

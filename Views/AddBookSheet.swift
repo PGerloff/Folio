@@ -13,6 +13,9 @@ struct AddBookSheet: View {
     @State private var suggestions: [BookSuggestion] = []
     @State private var suggestionsLoading = true
     @State private var suggestionsFailed = false
+    /// Increments each time a book is added from this sheet — drives the
+    /// success haptic so it fires exactly once per add.
+    @State private var addCounter = 0
 
     var body: some View {
         NavigationStack {
@@ -54,6 +57,7 @@ struct AddBookSheet: View {
                                         let id = store.addBook(title: suggestion.title,
                                                                author: suggestion.author,
                                                                status: destination)
+                                        addCounter += 1
                                         let theStore = store
                                         let title = suggestion.title
                                         let author = suggestion.author
@@ -107,6 +111,7 @@ struct AddBookSheet: View {
                 ManualEntryView(initialStatus: destination, onSaved: onAdded)
             }
             .task { await loadSuggestions() }
+            .sensoryFeedback(.impact(weight: .light), trigger: addCounter)
         }
         .presentationDragIndicator(.visible)
     }
@@ -229,6 +234,7 @@ struct AddBookSheet: View {
         let title  = parts[0].trimmingCharacters(in: .whitespaces)
         let author = parts.count > 1 ? parts[1...].joined(separator: " by ").trimmingCharacters(in: .whitespaces) : "Unknown"
         let id = store.addBook(title: title, author: author, status: destination)
+        addCounter += 1
         query = ""
         onAdded(id)
     }

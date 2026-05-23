@@ -19,6 +19,10 @@ final class BookStore {
     private let storeURL: URL
     private let coversDir: URL
 
+    /// URLSession used for Open Library API calls. Defaults to `.shared`;
+    /// tests inject a URLSession backed by a stub URLProtocol.
+    @ObservationIgnored private let urlSession: URLSession
+
     /// In-memory cache of decoded cover images, keyed by filename.
     /// Avoids re-reading + re-decoding JPEGs on every SwiftUI view recompute.
     /// NSCache is thread-safe and auto-evicts under memory pressure.
@@ -28,13 +32,17 @@ final class BookStore {
         return c
     }()
 
-    /// - Parameter documentsDirectory: Override the documents directory for
-    ///   testing. In production this stays nil and the real Documents/ is used.
-    init(documentsDirectory: URL? = nil) {
+    /// - Parameters:
+    ///   - documentsDirectory: Override the documents directory for testing.
+    ///     In production this stays nil and the real Documents/ is used.
+    ///   - urlSession: URLSession for Open Library calls. Defaults to .shared;
+    ///     tests inject a mocked session.
+    init(documentsDirectory: URL? = nil, urlSession: URLSession = .shared) {
         let docs = documentsDirectory
             ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         self.storeURL = docs.appendingPathComponent("folio.json")
         self.coversDir = docs.appendingPathComponent("covers", isDirectory: true)
+        self.urlSession = urlSession
         try? FileManager.default.createDirectory(at: coversDir, withIntermediateDirectories: true)
         load()
     }
@@ -149,7 +157,7 @@ final class BookStore {
         ]
         guard let searchURL = components.url else { return }
 
-        guard let (searchData, _) = try? await URLSession.shared.data(for: OpenLibrary.request(searchURL)),
+        guard let (searchData, _) = try? await urlSession.data(for: OpenLibrary.request(searchURL)),
               let result = try? JSONDecoder().decode(OLSearchResponse.self, from: searchData),
               let coverId = result.docs.first?.cover_i else { return }
 
@@ -157,7 +165,7 @@ final class BookStore {
         // Library return a 404 instead of a 1×1 placeholder when no cover exists.
         guard let coverURL = URL(string: "https://covers.openlibrary.org/b/id/\(coverId)-M.jpg?default=false") else { return }
 
-        guard let (imageData, response) = try? await URLSession.shared.data(for: OpenLibrary.request(coverURL)),
+        guard let (imageData, response) = try? await urlSession.data(for: OpenLibrary.request(coverURL)),
               let http = response as? HTTPURLResponse, http.statusCode == 200,
               !imageData.isEmpty else { return }
 
