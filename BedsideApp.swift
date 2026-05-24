@@ -10,7 +10,10 @@ struct BedsideApp: App {
         WindowGroup {
             RootView()
                 .environment(store)
-                .preferredColorScheme(.light)
+                // Honour the user-selected appearance from BookStore.
+                // Defaults to `.light` (Paperback Daylight); the user can opt
+                // in to `.dark` (Library at Night) from You → Settings.
+                .preferredColorScheme(store.appearance == .dark ? .dark : .light)
         }
     }
 }

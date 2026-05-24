@@ -131,11 +131,38 @@ struct YouView: View {
     private var settings: some View {
         VStack(alignment: .leading, spacing: 0) {
             MetaLabel(text: "Settings").padding(.bottom, 6)
-            // Notifications / Display & theme / Export library are tracked
-            // in BACKLOG.md (Sprint C+). Kept out of TestFlight builds to
-            // avoid dead-end taps generating tester noise.
+            // Notifications / Export library are tracked in BACKLOG.md.
+            // Kept out of TestFlight builds to avoid dead-end taps.
+            appearanceRow
             settingsRow("Clear library", isLast: true) { confirmReset = true }
         }
+    }
+
+    /// Inline toggle for Light ↔ Dark. Persisted via BookStore so the choice
+    /// survives relaunch; the SwiftUI scene reads `store.appearance` and
+    /// applies `.preferredColorScheme` accordingly.
+    private var appearanceRow: some View {
+        Toggle(isOn: Binding(
+            get: { store.appearance == .dark },
+            set: { store.setAppearance($0 ? .dark : .light) }
+        )) {
+            HStack(spacing: 10) {
+                Image(systemName: store.appearance == .dark ? "moon.fill" : "sun.max.fill")
+                    .font(.system(size: 14))
+                    .foregroundStyle(Bedside.ink3)
+                    .frame(width: 18)
+                Text("Dark mode")
+                    .font(.bedsideUI(15))
+                    .foregroundStyle(Bedside.ink1)
+            }
+        }
+        .tint(Bedside.sienna)
+        .padding(.vertical, 10)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(Bedside.paperEdge).frame(height: 0.5)
+        }
+        .accessibilityLabel("Dark mode")
+        .accessibilityHint("Switches Bedside between the light Paperback Daylight palette and the dark Library at Night palette.")
     }
 
     private func settingsRow(_ label: String, isLast: Bool = false, action: (() -> Void)? = nil) -> some View {

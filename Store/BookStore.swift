@@ -7,10 +7,23 @@ import SwiftUI
 import UIKit
 import Observation
 
+/// User's preferred appearance for the app. Defaults to `.light` to preserve
+/// the original Paperback Daylight aesthetic; users can opt in to the dark
+/// "Library at Night" palette from the Settings section in YouView.
+enum Appearance: String, Codable, CaseIterable {
+    case light
+    case dark
+}
+
 @Observable
 final class BookStore {
     var books: [Book] = []
     var favoriteAuthors: Set<String> = []
+
+    /// User's chosen appearance. Persisted alongside library data. Defaults
+    /// to `.light` for new installs and for legacy stores that predate the
+    /// field (decoded with `decodeIfPresent`).
+    var appearance: Appearance = .light
 
     /// Surfaced to the UI so the user sees disk/decode failures instead of
     /// silently losing data. Cleared after the alert is dismissed.
@@ -185,6 +198,12 @@ final class BookStore {
         setPhoto(bookId, data: imageData)
     }
 
+    func setAppearance(_ appearance: Appearance) {
+        guard self.appearance != appearance else { return }
+        self.appearance = appearance
+        save()
+    }
+
     func toggleFavoriteAuthor(_ name: String) {
         if favoriteAuthors.contains(name) {
             favoriteAuthors.remove(name)
@@ -246,13 +265,32 @@ final class BookStore {
 
     // MARK: - Persistence
 
+    /// On-disk shape. `appearance` is optional during decoding so libraries
+    /// written before the field existed still load cleanly (defaulting to
+    /// `.light`, matching the historical behaviour).
     private struct Persisted: Codable {
         var books: [Book]
         var favoriteAuthors: [String]
+        var appearance: Appearance?
+
+        init(books: [Book], favoriteAuthors: [String], appearance: Appearance) {
+            self.books = books
+            self.favoriteAuthors = favoriteAuthors
+            self.appearance = appearance
+        }
+
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            self.books           = try c.decode([Book].self,    forKey: .books)
+            self.favoriteAuthors = try c.decode([String].self,  forKey: .favoriteAuthors)
+            self.appearance      = try c.decodeIfPresent(Appearance.self, forKey: .appearance)
+        }
     }
 
     private func save() {
-        let payload = Persisted(books: books, favoriteAuthors: Array(favoriteAuthors))
+        let payload = Persisted(books: books,
+                                favoriteAuthors: Array(favoriteAuthors),
+                                appearance: appearance)
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         encoder.dateEncodingStrategy = .iso8601
@@ -284,6 +322,7 @@ final class BookStore {
             let payload = try decoder.decode(Persisted.self, from: data)
             self.books = payload.books
             self.favoriteAuthors = Set(payload.favoriteAuthors)
+            self.appearance = payload.appearance ?? .light
         } catch {
             // Corrupted JSON. Back the file up BEFORE the next save() overwrites
             // it — keeps the user's data recoverable.

@@ -8,7 +8,8 @@ Findings staged from the distinguished code review of 22 May 2026.
 - Top-3 pre-submission fixes (Privacy Manifest, accessibility labels, PhotoPickerButton concurrency + cancel dismiss) — commit `2d2f507`
 - **Sprint A** (H-1, M-1, M-2, M-5, M-6) — commit `f79233d`
 - **Sprint B** (H-2, M-3, M-4, L-1, L-2, L-4) — commit `0b9ef1d`
-- **Sprint C** (M-7, L-5, expanded test coverage) — see latest commit
+- **Sprint C** (M-7, L-5, expanded test coverage) — commit on master
+- **Sprint D** (M-8: dark mode "Library at Night") — see latest commit
 
 Everything else is staged for future sessions.
 
@@ -94,11 +95,9 @@ Added `suggestionsFailed` state. When both `fetchTrending` and `fetchClassics` r
 **Files:** `Views/BookDetailView.swift`, `Views/AddBookSheet.swift`, `Views/ShopView.swift`
 Mapping: `.impact(weight: .light)` for favourite toggle, rating change, and book added; `.success` for marking finished and marking as bought. All wired via iOS 17 `.sensoryFeedback` modifier.
 
-### 🟠 M-8 · Dark mode hard-locked off
-**File:** `FolioApp.swift:13` — `.preferredColorScheme(.light)`
-**Issue:** Forces all users into light mode regardless of system preference. Accessibility and battery concern on OLED devices.
-**Scope:** Real design work — needs dark variants of every `paper*`, `ink*`, and accent colour in `Theme.swift`.
-**Interim:** Add a TestFlight release note acknowledging light-only.
+### ✅ M-8 · Dark mode "Library at Night" — *shipped Sprint D*
+**Files:** `Theme/Theme.swift`, `BedsideApp.swift`, `Store/BookStore.swift`, `Views/YouView.swift`, `Assets.xcassets/BedsideBackground.colorset`
+Palette is now dynamic via `UITraitCollection.userInterfaceStyle`: every `paper*`/`ink*`/accent token resolves to its dark variant when the user is in Library-at-Night mode. The Dark palette is warm mahogany/leather (paper0 `#1C140C`, ink1 `#F1E5CC`, sienna shifts to `#C46A3F`). Cover-spine swatches deliberately stay identical in both modes — they read like real book spines on either surface. User opts in via a "Dark mode" toggle in You → Settings; choice is persisted in the library file alongside books (legacy files without the field default to `.light`, no migration required). Launch-screen colour also has a dark variant so a cold start in dark mode doesn't flash cream.
 
 ### ✅ L-5 · Cover fetch produces a visual "pop" in BookDetailView — *shipped Sprint C*
 **File:** `Components/CoverView.swift`
@@ -117,8 +116,8 @@ H-2, M-3, M-4, L-1, L-2, L-4 shipped.
 **✅ Sprint C — polish — DONE**
 M-7, L-5, and expanded test coverage shipped. 29 tests passing.
 
-**Sprint D — feature (own work item):**
-M-8 (dark mode design + implementation)
+**✅ Sprint D — dark mode — DONE**
+M-8 shipped. Library at Night palette, user-toggleable from You → Settings, persisted across launches. 32 tests passing.
 
 **Sprint E — pre-2.0 infra:**
 L-3 (Swift 6 upgrade), S-1 (migration framework)

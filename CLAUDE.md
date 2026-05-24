@@ -11,7 +11,7 @@ SwiftUI iOS reading-list app. iOS 17+, file-based JSON persistence, no backend.
 - `BedsideApp.swift` — app entry point
 - `Models/` — `Book`, `BookStatus`, `Note`
 - `Store/` — `BookStore` (@Observable, persists to `Documents/bedside.json`), `OpenLibrary` (shared API client)
-- `Theme/` — colours (`Bedside.sienna`, `Bedside.ink1`…), font helpers (`.bedsideDisplay`, `.bedsideUI`, `.bedsideMono`)
+- `Theme/` — colours (`Bedside.sienna`, `Bedside.ink1`…), font helpers (`.bedsideDisplay`, `.bedsideUI`, `.bedsideMono`). Every palette token is a dynamic `Color` that resolves light/dark via `UITraitCollection`, so views never branch on color scheme — they just reference `Bedside.*`.
 - `Components/` — reusable views (`MetaLabel`, `StatusPicker`, `PhotoPickerButton`, `CoverView`)
 - `Views/` — screens (`RootView`, `HomeView`, `ShopView`, `LibraryView`, `YouView`, `AddBookSheet`, `ManualEntryView`, `BookDetailView`)
 - `Assets.xcassets/` — `AppIcon`, `AccentColor`, `BedsideBackground` (launch screen)
@@ -36,6 +36,7 @@ See the `xcodegen-ios-app` skill for the full set of XcodeGen gotchas (Info.plis
 - Library JSON: `Documents/bedside.json` (pretty-printed, sorted keys, ISO8601 dates)
 - Cover photos: `Documents/covers/<book-uuid>.jpg` (re-encoded JPEG @ 0.85)
 - **Legacy migration:** on first launch after the rename, if `bedside.json` is missing and `folio.json` exists, the legacy file is moved to the new name once. Idempotent and a no-op for new installs.
+- **Appearance preference** lives in the same file under the `appearance` key (`"light"` | `"dark"`). Decoded with `decodeIfPresent` so older library files load cleanly and default to `.light`.
 - Corrupted store on load → backed up to `bedside.corrupted-<timestamp>.json` before reset; user is alerted via `lastErrorMessage`
 - Save/load errors surface to the UI through `BookStore.lastErrorMessage`, displayed by `RootView` as an alert. Don't swallow them.
 
@@ -77,8 +78,8 @@ Don't commit unprompted — wait to be asked.
 
 ## Tests
 
-29 tests across 4 suites, all in `BedsideTests/`:
-- `BookStorePersistenceTests` (8 — add/update/remove/notes/favourite-authors round-trip, corrupted-JSON backup, clean first launch, legacy folio.json → bedside.json migration)
+32 tests across 4 suites, all in `BedsideTests/`:
+- `BookStorePersistenceTests` (10 — add/update/remove/notes/favourite-authors round-trip, corrupted-JSON backup, clean first launch, legacy folio.json → bedside.json migration, appearance round-trip, legacy file without `appearance` key defaults to `.light`)
 - `BookShareContentTests` (9 — every status × rating combination)
 - `CoverPhotoTests` (7 — write/read/replace/clear/delete cascades, fail-loud on non-image bytes)
 - `OpenLibraryCoverFetchTests` (6, serialised — happy path, no match, 404, network error, skip-when-photo-exists, bad-author skip)

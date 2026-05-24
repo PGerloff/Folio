@@ -1,8 +1,9 @@
 // Theme.swift — Bedside palette + typography
 
 import SwiftUI
+import UIKit
 
-// MARK: - Hex helper
+// MARK: - Hex helpers
 
 extension Color {
     init(hex: UInt32) {
@@ -13,28 +14,59 @@ extension Color {
     }
 }
 
+extension UIColor {
+    convenience init(hex: UInt32) {
+        let r = CGFloat((hex >> 16) & 0xff) / 255
+        let g = CGFloat((hex >> 8)  & 0xff) / 255
+        let b = CGFloat( hex        & 0xff) / 255
+        self.init(red: r, green: g, blue: b, alpha: 1)
+    }
+}
+
+/// Builds a `Color` whose underlying UIColor resolves to `light` or `dark`
+/// depending on the active trait collection. Lets SwiftUI pick the right
+/// shade automatically when the system or user-controlled appearance flips.
+private func dynamic(light: UInt32, dark: UInt32) -> Color {
+    Color(uiColor: UIColor { trait in
+        trait.userInterfaceStyle == .dark
+            ? UIColor(hex: dark)
+            : UIColor(hex: light)
+    })
+}
+
 // MARK: - Palette
+//
+// Two palettes coexist:
+//
+// • **Light (Paperback Daylight)** — the original aged-paper aesthetic.
+// • **Dark (Library at Night)** — warm mahogany/leather; for low-light reading.
+//
+// Each token resolves dynamically via `UITraitCollection.userInterfaceStyle`,
+// so views don't need to branch on color scheme — just keep using `Bedside.*`
+// and the right shade comes through.
 
 enum Bedside {
-    // Paper
-    static let paper0    = Color(hex: 0xF5ECD8)
-    static let paper1    = Color(hex: 0xEFE4CB)
-    static let paper2    = Color(hex: 0xE6D8B8)
-    static let paperEdge = Color(hex: 0xD4C194)
+    // Paper — backgrounds & cards
+    static let paper0    = dynamic(light: 0xF5ECD8, dark: 0x1C140C) // base background
+    static let paper1    = dynamic(light: 0xEFE4CB, dark: 0x261B11) // card / chip surface
+    static let paper2    = dynamic(light: 0xE6D8B8, dark: 0x2E2117) // raised chip / disabled
+    static let paperEdge = dynamic(light: 0xD4C194, dark: 0x3A2A1B) // hairline strokes
 
-    // Ink
-    static let ink1 = Color(hex: 0x221911)
-    static let ink2 = Color(hex: 0x4A3B2A)
-    static let ink3 = Color(hex: 0x806B4F)
-    static let ink4 = Color(hex: 0xB09572)
+    // Ink — text levels
+    static let ink1 = dynamic(light: 0x221911, dark: 0xF1E5CC) // primary
+    static let ink2 = dynamic(light: 0x4A3B2A, dark: 0xC9B58C) // secondary
+    static let ink3 = dynamic(light: 0x806B4F, dark: 0x8E7A55) // meta labels
+    static let ink4 = dynamic(light: 0xB09572, dark: 0x5E4E34) // whisper / placeholder
 
     // Accents
-    static let sienna     = Color(hex: 0xB05328)
-    static let siennaSoft = Color(hex: 0xC77B53)
-    static let sage       = Color(hex: 0x6E7A4A)
-    static let rust       = Color(hex: 0x8E3A1A)
-    static let moss       = Color(hex: 0x4F5733)
+    static let sienna     = dynamic(light: 0xB05328, dark: 0xC46A3F)
+    static let siennaSoft = dynamic(light: 0xC77B53, dark: 0xD89072)
+    static let sage       = dynamic(light: 0x6E7A4A, dark: 0x9CA478)
+    static let rust       = dynamic(light: 0x8E3A1A, dark: 0xB85A38)
+    static let moss       = dynamic(light: 0x4F5733, dark: 0x8B9460)
 
+    /// Cover-spine swatches. Intentionally identical in light + dark — they're
+    /// meant to evoke real book spines, which look fine on either background.
     static func coverColor(_ c: CoverColor) -> Color {
         switch c {
         case .clay:  return Color(hex: 0xB4663D)

@@ -179,5 +179,49 @@ struct BookStorePersistenceTests {
         #expect(store.books.isEmpty)
         #expect(store.favoriteAuthors.isEmpty)
         #expect(store.lastErrorMessage == nil)
+        // Default appearance is light — preserves the original behaviour for
+        // fresh installs.
+        #expect(store.appearance == .light)
+    }
+
+    @Test("Appearance choice persists across reload")
+    func appearanceRoundTrip() throws {
+        let dir = try tempDir()
+        defer { cleanup(dir) }
+
+        let store1 = BookStore(documentsDirectory: dir)
+        #expect(store1.appearance == .light, "default should be .light")
+        store1.setAppearance(.dark)
+
+        let store2 = BookStore(documentsDirectory: dir)
+        #expect(store2.appearance == .dark)
+
+        // Flip back and verify the change propagates.
+        store2.setAppearance(.light)
+        let store3 = BookStore(documentsDirectory: dir)
+        #expect(store3.appearance == .light)
+    }
+
+    @Test("Legacy library file without appearance field defaults to .light")
+    func legacyAppearanceDefault() throws {
+        let dir = try tempDir()
+        defer { cleanup(dir) }
+
+        // Write a library JSON that intentionally omits the `appearance` key —
+        // simulates a file written by an older build.
+        let legacyJSON = """
+        {
+          "books" : [],
+          "favoriteAuthors" : []
+        }
+        """
+        let storeURL = dir.appendingPathComponent("bedside.json")
+        try legacyJSON.write(to: storeURL, atomically: true, encoding: .utf8)
+
+        let store = BookStore(documentsDirectory: dir)
+
+        // Decoding should not throw or corrupt-backup; appearance falls back.
+        #expect(store.lastErrorMessage == nil)
+        #expect(store.appearance == .light)
     }
 }

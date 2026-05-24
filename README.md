@@ -50,7 +50,7 @@ Then ⌘R to build and run. Camera capture only works on a real device; the simu
 │   ├── AddBookSheet.swift        quick-add bottom sheet
 │   ├── ManualEntryView.swift     full form with photo capture
 │   └── YouView.swift             stats, favourite authors, settings
-└── BedsideTests/                 Swift Testing — 29 tests across 4 suites
+└── BedsideTests/                 Swift Testing — 32 tests across 4 suites
 ```
 
 ## Persistence layout
@@ -69,7 +69,6 @@ Then ⌘R to build and run. Camera capture only works on a real device; the simu
 
 - **Barcode scanning** — not yet wired; design contemplates `AVFoundation` + `VNDetectBarcodesRequest`.
 - **Library export / import** — tracked in `BACKLOG.md`.
-- **Dark mode palette** — the original design contemplates a "Library at Night" palette; port by adding a `.dark` branch to `Bedside` in `Theme/Theme.swift`.
 - **iCloud sync** — `BookStore` writes to the local Documents directory only. For sync, switch persistence to SwiftData with CloudKit container.
 
 See `BACKLOG.md` for the full list of post-review backlog items.
@@ -83,4 +82,4 @@ xcodebuild test \
   -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2"
 ```
 
-Or `⌘U` in Xcode. 29 tests across 4 suites currently pass in under a second.
+Or `⌘U` in Xcode. 32 tests across 4 suites currently pass in under a second.
